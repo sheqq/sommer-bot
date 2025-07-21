@@ -1,7 +1,7 @@
+const {PermissionFlagsBits} = require("discord.js");
 module.exports = {
     name: "clear",
     description: "Nachrichten löschen",
-    //devOnly: Boolean
     options: [
         {
             name: 'amount',
@@ -9,5 +9,6 @@ module.exports = {
             type: 4,
             required: false,
         }
-    ]
+    ],
+    permissionsRequired: [PermissionFlagsBits.Administrator],
 };
