@@ -1,0 +1,17 @@
+{
+  "name": "sommer-bot",
+  "version": "1.0.0",
+  "description": "discord bot for the discord server sommer",
+  "license": "ISC",
+  "author": "sheqq",
+  "type": "commonjs",
+  "main": "src/index.js",
+  "register-commands": "src/handlers/register-commands.js",
+  "scripts": {
+    "test": "test"
+  },
+  "dependencies": {
+    "discord.js": "^14.21.0",
+    "dotenv": "^17.2.0"
+  }
+}
