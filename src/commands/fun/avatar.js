@@ -1,9 +1,8 @@
 module.exports = {
     name: "avatar",
-    description: "Profilbild",
+    description: "zeige dein Profilbild",
 
     callback: (client, interaction) => {
-        const user = interaction.options.getUser('user') || interaction.user;
-        interaction.reply({ content: user.displayAvatarURL({ dynamic: false, size: 2048 })});
-    }
+        interaction.reply({ content: interaction.user.displayAvatarURL({ dynamic: false, size: 2048 })});
+    },
 };

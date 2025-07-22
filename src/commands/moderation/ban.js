@@ -2,18 +2,18 @@ const {ApplicationCommandOptionType, PermissionFlagsBits} = require("discord.js"
 
 module.exports = {
     name: 'ban',
-    description: "Nutzer bannen",
+    description: "einen Nutzer bannen",
     devOnly: true,
     options: [
         {
-            name: "target",
-            description: "Nutzer",
+            name: "nutzer",
+            description: "Wer",
             required: true,
             type:ApplicationCommandOptionType.Mentionable,
         },
         {
-            name: "reason",
-            description: "Grund",
+            name: "grund",
+            description: "Warum",
             required: false,
             type:ApplicationCommandOptionType.String,
         },
