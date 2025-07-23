@@ -1,5 +1,5 @@
 const {PermissionFlagsBits} = require("discord.js");
-const {storeColorRole, pairs} = require("../../utils/colorRoles.js");
+const {storeColorRole} = require("../../utils/colorRoles.js");
 const createRandomColor = require("../../utils/createRandomColor.js");
 module.exports = {
     name: "create",

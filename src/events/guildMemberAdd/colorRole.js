@@ -1,6 +1,6 @@
 const {Client, GuildMember} = require("discord.js");
 const createRandomColor = require("../../utils/createRandomColor.js");
-const {storeColorRole, pairs} = require("../../utils/colorRoles");
+const {storeColorRole} = require("../../utils/colorRoles");
 
 /**
  *
