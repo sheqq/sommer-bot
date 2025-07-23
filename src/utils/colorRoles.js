@@ -16,10 +16,11 @@ function storeColorRole(color, roleId) {
             }
         }
     }
-    if(findColorRole(color) == null) {
+    const index = pairs.findIndex(p => p.key === color);
+    if (index === -1) {
         pairs.push({ key: color, value: roleId, amount: 1 });
     } else {
-
+        pairs[index].amount += 1;
     }
     fs.writeFileSync(filePath, JSON.stringify(pairs, null, 2), 'utf8');
 }
