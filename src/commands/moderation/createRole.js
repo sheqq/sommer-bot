@@ -1,6 +1,5 @@
 const {PermissionFlagsBits} = require("discord.js");
-const {storeColorRole, findColorRole} = require("../../utils/colorRoles.js");
-const createRandomColor = require("../../utils/createRandomColor.js");
+const {storeColorRole, createColorRole, createRandomColor, findColorRole} = require("../../utils/colorRoles.js");
 module.exports = {
     name: "create",
     description: "eine Farbrolle erstellen",
@@ -20,24 +19,27 @@ module.exports = {
     ],
     permissionsRequired: [PermissionFlagsBits.Administrator],
 
-    callback: async (client, interaction) => {
-        const color = interaction.options.getString("farbe") || createRandomColor();
+    callback: async (client, interaction, member) => {
+
         const user = interaction.options.getUser("nutzer") || interaction.user;
-        const member = await interaction.guild.members.fetch(user.id);
-        const guild = interaction.guild;
-        const botMember = guild.members.me;
-        const highestBotRole = botMember.roles.highest;
+        const guildMember = await interaction.guild.members.fetch(user.id);
+
+
+
+
+        const color = interaction.options.getString("farbe") || createRandomColor();
         console.log(color);
 
-        const role = await guild.roles.create({
-            name: `` + color,
-            color: color,
-            position: highestBotRole.position, // möglichst weit oben
-            reason: "Neue Farbrolle für neues Mitglied"
-        });
+        const key = await findColorRole(color);
 
-        await member.roles.add(role);
+        let role;
+        if(key == null) {
+            role = createColorRole(member.guild, color);
+        }
         storeColorRole(color, role.id);
+
+        // Rolle zuweisen
+        await guildMember.roles.add(role);
         interaction.reply({content: `Die Rolle **${role.name}** wurde erstellt und ${user} zugewiesen.`});
     },
 };
