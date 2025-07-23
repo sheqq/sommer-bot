@@ -19,8 +19,23 @@ module.exports = {
     ],
     permissionsRequired: [PermissionFlagsBits.Administrator],
 
-    callback: (client, interaction) => {
-        const color = interaction.options.getString("color") || createRandomColor();
+    callback: async (client, interaction) => {
+        const color = interaction.options.getString("farbe") || createRandomColor();
+        const user = interaction.options.getUser("nutzer") || interaction.user;
+        const member = await interaction.guild.members.fetch(user.id);
+        const guild = interaction.guild;
+        const botMember = guild.members.me;
+        const highestBotRole = botMember.roles.highest;
         console.log(color);
+
+        const role = await guild.roles.create({
+            name: `` + color,
+            color: color,
+            position: highestBotRole.position, // möglichst weit oben
+            reason: "Neue Farbrolle für neues Mitglied"
+        });
+
+        await member.roles.add(role);
+        interaction.reply({content: `Die Rolle **${role.name}** wurde erstellt und ${user} zugewiesen.`});
     },
 };
