@@ -1,6 +1,6 @@
 const {Client, GuildMember} = require("discord.js");
 const createRandomColor = require("../../utils/createRandomColor.js");
-const {storeColorRole, pairs} = require("../../utils/storeColorRole");
+const {storeColorRole, pairs} = require("../../utils/colorRoles");
 
 /**
  *
@@ -24,5 +24,5 @@ module.exports = async (client, member) => {
 
     // Rolle zuweisen
     await member.roles.add(role);
-    const obj = storeColorRole(color, role.id);
+    storeColorRole(color, role.id);
 }

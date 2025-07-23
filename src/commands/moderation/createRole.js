@@ -1,5 +1,5 @@
 const {PermissionFlagsBits} = require("discord.js");
-const {storeColorRole, pairs} = require("../../utils/storeColorRole.js");
+const {storeColorRole, pairs} = require("../../utils/colorRoles.js");
 const createRandomColor = require("../../utils/createRandomColor.js");
 module.exports = {
     name: "create",
@@ -37,8 +37,7 @@ module.exports = {
         });
 
         await member.roles.add(role);
-        const obj = storeColorRole(color, role.id);
-        console.log("createRole: "+obj.key + " : " + obj.value);
+        storeColorRole(color, role.id);
         interaction.reply({content: `Die Rolle **${role.name}** wurde erstellt und ${user} zugewiesen.`});
     },
 };
