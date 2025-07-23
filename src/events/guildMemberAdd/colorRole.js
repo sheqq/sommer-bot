@@ -24,5 +24,5 @@ module.exports = async (client, member) => {
 
     // Rolle zuweisen
     await member.roles.add(role);
-    storeColorRole(color, role.id);
+    const obj = storeColorRole(color, role.id);
 }

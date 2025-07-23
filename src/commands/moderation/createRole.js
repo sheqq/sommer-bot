@@ -37,8 +37,8 @@ module.exports = {
         });
 
         await member.roles.add(role);
-        storeColorRole(color, role.id);
-        console.log(pairs.forEach(pair => pair.toString()));
+        const obj = storeColorRole(color, role.id);
+        console.log("createRole: "+obj.key + " : " + obj.value);
         interaction.reply({content: `Die Rolle **${role.name}** wurde erstellt und ${user} zugewiesen.`});
     },
 };
