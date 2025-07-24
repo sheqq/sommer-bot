@@ -5,7 +5,7 @@ const path = require('path');
 
 const filePath = path.join(__dirname, 'colorRoles.json');
 
-function storeColorRole(color, roleId) {
+function storeColorRole(color: any, roleId: any) {
     let pairs = [];
     if (fs.existsSync(filePath)) {
         const content = fs.readFileSync(filePath, 'utf8');
