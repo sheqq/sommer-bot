@@ -1,3 +1,5 @@
+import {Colors, Guild} from "discord.js";
+
 const fs = require('fs');
 const path = require('path');
 
@@ -25,7 +27,7 @@ function storeColorRole(color, roleId) {
     fs.writeFileSync(filePath, JSON.stringify(pairs, null, 2), 'utf8');
 }
 
-async function createColorRole(guild, color) {
+async function createColorRole(guild: Guild, color: any) {
     const botMember = guild.members.me;
     const highestBotRole = botMember.roles.highest;
 

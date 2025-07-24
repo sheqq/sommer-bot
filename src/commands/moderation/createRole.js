@@ -1,5 +1,5 @@
 const {PermissionFlagsBits} = require("discord.js");
-const {storeColorRole, createColorRole, createRandomColor, findColorRole} = require("../../utils/colorRoles.js");
+const {storeColorRole, createColorRole, createRandomColor, findColorRole} = require("../../utils/colorRoles.ts");
 module.exports = {
     name: "create",
     description: "eine Farbrolle erstellen",
