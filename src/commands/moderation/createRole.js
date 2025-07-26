@@ -1,5 +1,5 @@
 const {PermissionFlagsBits} = require("discord.js");
-const {storeColorRole, createColorRole, createRandomColor, findColorRole} = require("../../utils/colorRoles.ts");
+const {storeColorRole, createColorRole, createRandomColor, findColorRole} = require("../../utils/colorRoles.js");
 module.exports = {
     name: "create",
     description: "eine Farbrolle erstellen",
@@ -34,7 +34,7 @@ module.exports = {
 
         let role;
         if(key == null) {
-            role = createColorRole(member.guild, color);
+            role = createColorRole(interaction.guild, color);
         }
         storeColorRole(color, role.id);
 

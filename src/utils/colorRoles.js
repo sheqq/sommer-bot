@@ -1,11 +1,9 @@
-import {Colors, Guild} from "discord.js";
-
 const fs = require('fs');
 const path = require('path');
 
 const filePath = path.join(__dirname, 'colorRoles.json');
 
-function storeColorRole(color: any, roleId: any) {
+function storeColorRole(color, roleId) {
     let pairs = [];
     if (fs.existsSync(filePath)) {
         const content = fs.readFileSync(filePath, 'utf8');
@@ -20,21 +18,21 @@ function storeColorRole(color: any, roleId: any) {
     }
     const index = pairs.findIndex(p => p.key === color);
     if (index === -1) {
-        pairs.push({key: color, value: roleId, amount: 1});
+        pairs.push({key: color, value: roleId});
     } else {
-        pairs[index].amount += 1;
+
     }
     fs.writeFileSync(filePath, JSON.stringify(pairs, null, 2), 'utf8');
 }
 
-async function createColorRole(guild: Guild, color: any) {
+async function createColorRole(guild, color) {
     const botMember = guild.members.me;
     const highestBotRole = botMember.roles.highest;
 
     return await guild.roles.create({
         name: `` + color,
         color: color,
-        position: highestBotRole.position, // möglichst weit oben
+        position: 0, // möglichst weit oben
         reason: "Neue Farbrolle für neues Mitglied"
     });
 }
