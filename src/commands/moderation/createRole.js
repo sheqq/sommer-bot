@@ -31,12 +31,15 @@ module.exports = {
 
         let role;
         if(key == null) {
-            role = await createColorRole(interaction.guild, color);
+            role = await createColorRole(member.guild, color);
             storeColorRole(color, role);
-        }
 
-        // Rolle zuweisen
-        await guildMember.roles.add(role);
+            // Rolle zuweisen
+            await member.roles.add(role);
+        } else {
+            storeColorRole(key.name, key);
+            await member.roles.add(key);
+        }
         interaction.reply({content: `Die Rolle **${role.name}** wurde erstellt und ${user} zugewiesen.`});
     },
 };
