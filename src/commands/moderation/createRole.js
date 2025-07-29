@@ -1,5 +1,5 @@
 const {PermissionFlagsBits} = require("discord.js");
-const {storeColorRole, createColorRole, createRandomColor, findColorRole} = require("../../utils/colorRoles.js");
+const {storeColorRole, createColorRole, createRandomColor, getColorRole} = require("../../utils/colorRoles.js");
 module.exports = {
     name: "create",
     description: "eine Farbrolle erstellen",
@@ -30,13 +30,13 @@ module.exports = {
         const color = interaction.options.getString("farbe") || createRandomColor();
         console.log(color);
 
-        const key = await findColorRole(color);
+        const key = await getColorRole(color);
 
         let role;
         if(key == null) {
-            role = createColorRole(interaction.guild, color);
+            role = await createColorRole(interaction.guild, color);
         }
-        storeColorRole(color, role.id);
+        storeColorRole(color, role);
 
         // Rolle zuweisen
         await guildMember.roles.add(role);
