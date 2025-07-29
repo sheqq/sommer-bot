@@ -24,9 +24,6 @@ module.exports = {
         const user = interaction.options.getUser("nutzer") || interaction.user;
         const guildMember = await interaction.guild.members.fetch(user.id);
 
-
-
-
         const color = interaction.options.getString("farbe") || createRandomColor();
         console.log(color);
 
@@ -35,8 +32,8 @@ module.exports = {
         let role;
         if(key == null) {
             role = await createColorRole(interaction.guild, color);
+            storeColorRole(color, role);
         }
-        storeColorRole(color, role);
 
         // Rolle zuweisen
         await guildMember.roles.add(role);

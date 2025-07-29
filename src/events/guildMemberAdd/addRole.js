@@ -6,7 +6,7 @@ const {storeColorRole, createRandomColor, createColorRole, getColorRole} = requi
  * @param {Client} client
  * @param {GuildMember} member
  */
-module.exports = async (client, member) => {
+module.exports = async (client, member, interaction) => {
 
     const color = createRandomColor();
     console.log(color);
