@@ -9,19 +9,19 @@ module.exports = {
             name: "nutzer",
             description: "Wer",
             required: true,
-            type: 9,
+            type: ApplicationCommandOptionType.User,
         },
         {
             name: "grund",
             description: "Warum",
             required: false,
-            type: 3,
+            type: ApplicationCommandOptionType.String,
         },
     ],
     permissionsRequired: [PermissionFlagsBits.Administrator],
 
-    callback: async (interaction) => {
-            const user = interaction.options.getUser('nutzer');
+    callback: async (client, interaction) => {
+            const user = interaction.options.getUser('nutzer') || null;
             const reason = interaction.options.getString('grund') || 'Kein Grund angegeben';
 
             if (!interaction.member.permissions.has(PermissionFlagsBits.BanMembers)) {

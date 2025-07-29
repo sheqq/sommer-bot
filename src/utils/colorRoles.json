@@ -1,13 +1,13 @@
 [
   {
-    "key": "#e12359",
+    "key": "#06de9a",
     "value": {
       "guild": "1366379311459729440",
       "icon": null,
       "unicodeEmoji": null,
-      "id": "1399660448332382330",
-      "name": "#e12359",
-      "color": 14754649,
+      "id": "1399671030339080263",
+      "name": "#06de9a",
+      "color": 450202,
       "hoist": false,
       "rawPosition": 1,
       "permissions": "2248473465708097",
@@ -15,7 +15,26 @@
       "mentionable": false,
       "flags": 0,
       "tags": null,
-      "createdTimestamp": 1753775455316
+      "createdTimestamp": 1753777978263
+    }
+  },
+  {
+    "key": "#a37b11",
+    "value": {
+      "guild": "1366379311459729440",
+      "icon": null,
+      "unicodeEmoji": null,
+      "id": "1399671245678837865",
+      "name": "#a37b11",
+      "color": 10713873,
+      "hoist": false,
+      "rawPosition": 2,
+      "permissions": "2248473465708097",
+      "managed": false,
+      "mentionable": false,
+      "flags": 0,
+      "tags": null,
+      "createdTimestamp": 1753778029604
     }
   }
 ]

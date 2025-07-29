@@ -13,13 +13,13 @@ module.exports = {
         {
             name: 'nutzer',
             description: 'welcher Nutzer bekommt die Rolle',
-            type: 9,
+            type: 6,
             required: false,
         }
     ],
     permissionsRequired: [PermissionFlagsBits.Administrator],
 
-    callback: async (client, interaction, member) => {
+    callback: async (client, interaction) => {
 
         const user = interaction.options.getUser("nutzer") || interaction.user;
         const guildMember = await interaction.guild.members.fetch(user.id);
@@ -31,14 +31,14 @@ module.exports = {
 
         let role;
         if(key == null) {
-            role = await createColorRole(member.guild, color);
+            role = await createColorRole(interaction.guild, color);
             storeColorRole(color, role);
 
             // Rolle zuweisen
-            await member.roles.add(role);
+            await guildMember.roles.add(role);
         } else {
             storeColorRole(key.name, key);
-            await member.roles.add(key);
+            await guildMember.roles.add(key);
         }
         interaction.reply({content: `Die Rolle **${role.name}** wurde erstellt und ${user} zugewiesen.`});
     },
