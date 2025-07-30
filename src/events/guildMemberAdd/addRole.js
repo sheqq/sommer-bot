@@ -6,23 +6,20 @@ const {storeColorRole, createRandomColor, createColorRole, getColorRole} = requi
  * @param {Client} client
  * @param {GuildMember} member
  */
-module.exports = async (client, member, interaction) => {
+module.exports = async (client, member) => {
 
     const color = createRandomColor();
     console.log(color);
 
-    const key = await getColorRole(color);
+    let role = await getColorRole(color);
 
-    let role;
-    if(key == null) {
+    if(role == null) {
         role = await createColorRole(member.guild, color);
-        storeColorRole(color, role);
 
-        // Rolle zuweisen
-        await member.roles.add(role);
-    } else {
-        storeColorRole(key.name, key);
-        await member.roles.add(key);
     }
+    storeColorRole(color, role);
+
+    // Rolle zuweisen
+    await member.roles.add(role);
 
 }

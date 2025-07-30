@@ -27,19 +27,16 @@ module.exports = {
         const color = interaction.options.getString("farbe") || createRandomColor();
         console.log(color);
 
-        const key = await getColorRole(color);
+        let role = await getColorRole(color);
 
-        let role;
-        if(key == null) {
+        if(role == null) {
             role = await createColorRole(interaction.guild, color);
-            storeColorRole(color, role);
 
-            // Rolle zuweisen
-            await guildMember.roles.add(role);
-        } else {
-            storeColorRole(key.name, key);
-            await guildMember.roles.add(key);
         }
+        storeColorRole(color, role);
+
+        // Rolle zuweisen
+        await guildMember.roles.add(role);
         interaction.reply({content: `Die Rolle **${role.name}** wurde erstellt und ${user} zugewiesen.`});
     },
 };
