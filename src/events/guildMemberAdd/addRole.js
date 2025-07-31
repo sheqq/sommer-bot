@@ -17,7 +17,7 @@ module.exports = async (client, member) => {
         role = await createColorRole(member.guild, color);
 
     }
-    storeColorRole(color, role);
+    await storeColorRole(color, role);
 
     // Rolle zuweisen
     await member.roles.add(role);

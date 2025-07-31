@@ -1,1 +1,40 @@
-[]
+[
+  {
+    "key": "#1e08a8",
+    "value": {
+      "guild": "1366379311459729440",
+      "icon": null,
+      "unicodeEmoji": null,
+      "id": "1400388988027666522",
+      "name": "#1e08a8",
+      "color": 1968296,
+      "hoist": false,
+      "rawPosition": 1,
+      "permissions": "2248473465708097",
+      "managed": false,
+      "mentionable": false,
+      "flags": 0,
+      "tags": null,
+      "createdTimestamp": 1753949152715
+    }
+  },
+  {
+    "key": "#32e1e2",
+    "value": {
+      "guild": "1366379311459729440",
+      "icon": null,
+      "unicodeEmoji": null,
+      "id": "1400389756503982150",
+      "name": "#32e1e2",
+      "color": 3334626,
+      "hoist": false,
+      "rawPosition": 2,
+      "permissions": "2248473465708097",
+      "managed": false,
+      "mentionable": false,
+      "flags": 0,
+      "tags": null,
+      "createdTimestamp": 1753949335934
+    }
+  }
+]
