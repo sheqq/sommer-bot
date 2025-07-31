@@ -4,7 +4,7 @@
   "description": "discord bot for the discord server sommer",
   "license": "ISC",
   "author": "sheqq",
-  "nodeVersion": "22.13.1"
+  "nodeVersion": "22.16.0",
   "type": "commonjs",
   "main": "src/index.js",
   "register-commands": "src/handlers/register-commands.js",
