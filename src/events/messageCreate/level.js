@@ -8,8 +8,11 @@ const filePath = path.join(__dirname, 'levels.json');
  * @param {Client} client
  * @param {Message} message
  */
-module.exports = (client, message) => {
+module.exports = async (client, message) => {
+    if (message.author.bot || !message.guild) return; // Ignoriere Bot-Nachrichten und Nachrichten außerhalb von Servern
     let pairs = [];
+    let newXP;
+    let newLevel;
     if (fs.existsSync(filePath)) {
         const content = fs.readFileSync(filePath, 'utf8');
         if (content.trim().length > 0) {
@@ -21,11 +24,13 @@ module.exports = (client, message) => {
             }
         }
     }
-    const index = pairs.findIndex(p => p.key === color);
+
+    const index = pairs.findIndex(p => p.key === message.author.id);
     if (index === -1) {
-        pairs.push({key: message.author, value: {xp: 0, level: 1}});
+        pairs.push({key: message.author.id, value: {xp: 10, level: 1}});
     } else {
-        pairs[index].value.xp += 10; // XP erhöhen
+        pairs[index].value.xp += 10;
+        newXP = pairs[index].value.xp;
         const nextLevelXp = pairs[index].value.level * 100;
 
         if (pairs[index].value.xp >= nextLevelXp) {
@@ -33,8 +38,9 @@ module.exports = (client, message) => {
             pairs[index].value.xp = 0;
             message.channel.send(`${message.author.tag}, du bist jetzt Level ${pairs[index].value.level}!`);
         }
+        newLevel = pairs[index].value.level;
     }
-    fs.writeFileSync(filePath, JSON.stringify(pairs, null, 2), 'utf8');
+    await fs.writeFileSync(filePath, JSON.stringify(pairs, null, 2), 'utf8');
 
-    console.log(`${message.author.tag}, du hast jetzt ${pairs[index].value.xp} XP und bist level: ${pairs[index].value.level}!`);
+    await console.log(`${message.author.tag}, du hast jetzt ${newXP} XP und bist level: ${newLevel}!`);
 }

@@ -11,10 +11,17 @@ module.exports = (client) => {
 
         const eventName = eventFolder.replace(/\\/g, '/').split('/').pop();
 
+
+
         client.on(eventName, async (arg) => {
             for (const eventFile of eventFiles) {
                 const eventFunction = require(eventFile);
-                await eventFunction(client, arg);
+                // Prüfung hinzufügen
+                if (typeof eventFunction === 'function') {
+                    await eventFunction(client, arg);
+                } else {
+                    console.error(`Event file ${eventFile} does not export a function:`, typeof eventFunction);
+                }
             }
         });
     }
