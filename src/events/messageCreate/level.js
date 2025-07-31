@@ -1,6 +1,7 @@
 const {Client, Message} = require("discord.js");
-
-const xpMap = new Map();
+const fs = require('fs');
+const path = require('path');
+const filePath = path.join(__dirname, 'levels.json');
 
 /**
  *
@@ -8,24 +9,32 @@ const xpMap = new Map();
  * @param {Message} message
  */
 module.exports = (client, message) => {
-    console.log("Event ausgelöst, message:", message);
-    if (message.author?.bot) {
-        console.log("nachricht von einem Bot ignoriert");
-        return;
+    let pairs = [];
+    if (fs.existsSync(filePath)) {
+        const content = fs.readFileSync(filePath, 'utf8');
+        if (content.trim().length > 0) {
+            try {
+                const parsed = JSON.parse(content);
+                pairs = Array.isArray(parsed) ? parsed : [];
+            } catch {
+                pairs = [];
+            }
+        }
     }
-    const userId = message.author?.id;
-    const xp = xpMap.get(userId) || { xp: 0, level: 1 };
+    const index = pairs.findIndex(p => p.key === color);
+    if (index === -1) {
+        pairs.push({key: message.author, value: {xp: 0, level: 1}});
+    } else {
+        pairs[index].value.xp += 10; // XP erhöhen
+        const nextLevelXp = pairs[index].value.level * 100;
 
-    xp.xp += 10; // XP pro Nachricht
-    const nextLevelXp = xp.level * 100;
-
-    if (xp.xp >= nextLevelXp) {
-        xp.level += 1;
-        xp.xp = 0;
-        message.channel.send(`${message.author?.tag}, du bist jetzt Level ${xp.level}!`);
+        if (pairs[index].value.xp >= nextLevelXp) {
+            pairs[index].value.level += 1;
+            pairs[index].value.xp = 0;
+            message.channel.send(`${message.author.tag}, du bist jetzt Level ${pairs[index].value.level}!`);
+        }
     }
+    fs.writeFileSync(filePath, JSON.stringify(pairs, null, 2), 'utf8');
 
-    xpMap.set(userId, xp);
-
-    console.log(`${userId}, du hast jetzt ${xp.xp} XP!`);
+    console.log(`${message.author.tag}, du hast jetzt ${pairs[index].value.xp} XP und bist level: ${pairs[index].value.level}!`);
 }
