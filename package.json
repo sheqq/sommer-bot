@@ -7,7 +7,7 @@
   "nodeVersion": "22.13.1",
   "type": "commonjs",
   "main": "src/index.js",
-  "register-commands": "src/handlers/register-commands.js",
+  "start": "src/index.js",
   "scripts": {
     "test": "test"
   },
