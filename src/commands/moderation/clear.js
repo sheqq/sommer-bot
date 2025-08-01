@@ -13,7 +13,7 @@ module.exports = {
     permissionsRequired: [PermissionFlagsBits.Administrator],
 
     callback: (client, interaction) => {
-        const amount = interaction.options.getInteger('amount') || 1;
+        const amount = interaction.options.getInteger('menge') || 1;
         if (amount < 1 || amount > 100) {
             interaction.reply({ content: 'Bitte gib eine Zahl zwischen 1 und 100 an.'});
             return;
