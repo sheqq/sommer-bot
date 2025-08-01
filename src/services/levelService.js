@@ -1,6 +1,6 @@
 const fs = require('fs');
 const path = require('path');
-const filePath = 'levels.json';
+const filePath = path.join(__dirname, 'levels.json');
 module.exports = (client, arg) => {
     function getFile() {
         let pairs = [];
