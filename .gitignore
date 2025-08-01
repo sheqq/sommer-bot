@@ -1,1 +1,3 @@
-     .env
+.env
+src/utils/colorRoles.json
+src/events/messageCreate/levels.json
