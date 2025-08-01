@@ -23,6 +23,9 @@ module.exports = async (client, message) => {
                 pairs = [];
             }
         }
+    } else {
+        fs.writeFileSync(filePath, JSON.stringify([], null, 2), 'utf8');
+        pairs = [];
     }
 
     const index = pairs.findIndex(p => p.key === message.author.id);

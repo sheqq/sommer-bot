@@ -14,7 +14,11 @@ function storeColorRole(color, role) {
                 pairs = [];
             }
         }
+    } else {
+        fs.writeFileSync(filePath, JSON.stringify([], null, 2), 'utf8');
+        pairs = [];
     }
+
     const index = pairs.findIndex(p => p.key === color);
     if (index === -1) {
 
