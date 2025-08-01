@@ -31,8 +31,8 @@ module.exports = async (client, message) => {
     const index = pairs.findIndex(p => p.key === message.author.id);
     if (index === -1) {
         pairs.push({key: message.author.id, value: {xp: 10, level: 1}});
-        newXP = pairs[pairs.length - 1].key;
-        newLevel = pairs[pairs.length - 1].level;
+        newXP = pairs[pairs.length - 1].value.xp;
+        newLevel = pairs[pairs.length - 1].value.level;
     } else {
         pairs[index].value.xp += 10;
         newXP = pairs[index].value.xp;
