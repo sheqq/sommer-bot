@@ -1,8 +1,9 @@
 const fs = require('fs');
 const path = require('path');
-const filePath = path.join(__dirname, 'levels.json');
+
 module.exports = (client, arg) => {
-    function getFile() {
+    function getFile(filename) {
+        const filePath = path.join(__dirname, filename);
         let pairs = [];
         if (fs.existsSync(filePath)) {
             const content = fs.readFileSync(filePath, 'utf8');
@@ -21,8 +22,13 @@ module.exports = (client, arg) => {
         return pairs;
     }
 
-    function writeFile(content) {
-        fs.writeFileSync(filePath, JSON.stringify(content, null, 2), 'utf8');
+    function writeFile(content, filename) {
+        const filePath = path.join(__dirname, filename);
+        if(fs.existsSync(filePath)) {
+            fs.writeFileSync(filePath, JSON.stringify(content, null, 2), 'utf8');
+        } else {
+            console.log("can not find file " + filename);
+        }
     }
 
     return {

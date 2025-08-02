@@ -1,33 +1,18 @@
-const fs = require('fs');
-const path = require('path');
-const filePath = path.join(__dirname, 'colorRoles.json');
+const roleService = require("../services/jsonService.js");
+const service = roleService(null,null);
+
 
 function storeColorRole(color, role) {
-    let pairs = [];
-    if (fs.existsSync(filePath)) {
-        const content = fs.readFileSync(filePath, 'utf8');
-        if (content.trim().length > 0) {
-            try {
-                const parsed = JSON.parse(content);
-                pairs = Array.isArray(parsed) ? parsed : [];
-            } catch {
-                pairs = [];
-            }
-        }
-    } else {
-        fs.writeFileSync(filePath, JSON.stringify([], null, 2), 'utf8');
-        pairs = [];
-    }
+    let pairs = service.getFile('colorRoles.json');
 
     const index = pairs.findIndex(p => p.key === color);
     if (index === -1) {
-
         pairs.push({key: color, value: role});
     } else {
         // what happpens if the role is already inside the json file?
         // amount attribute needs to be implemented into each json object wich increases for users with the same color
     }
-    fs.writeFileSync(filePath, JSON.stringify(pairs, null, 2), 'utf8');
+    service.writeFile(pairs, 'colorRoles.json');
 }
 
 async function createColorRole(guild, color) {
@@ -47,19 +32,9 @@ function createRandomColor() {
 }
 
 function getColorRole(color) {
-    if (fs.existsSync(filePath)) {
-        const content = fs.readFileSync(filePath, 'utf8');
-        if (content.trim().length > 0) {
-            try {
-                const pairs = JSON.parse(content);
-                const pair = pairs.find(p => p.key === color);
-                return pair ? pair.value : null;
-            } catch {
-                return null;
-            }
-        }
-    }
-    return null;
+    const pairs = service.getFile('colorRoles.json');
+    const pair = pairs.find(p => p.key === color);
+    return pair ? pair : null;
 }
 
 module.exports = { storeColorRole, createRandomColor, createColorRole, getColorRole };

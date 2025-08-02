@@ -1,5 +1,5 @@
 const {Client, Message} = require("discord.js");
-const levelService = require("../../services/levelService.js");
+const levelService = require("../../services/jsonService.js");
 
 /**
  *
@@ -11,7 +11,7 @@ module.exports = async (client, message) => {
 
     //levelService.getFile()
     const service = levelService(client,null);
-    let pairs = service.getFile();
+    let pairs = service.getFile('levels.json');
 
     //
     const index = pairs.findIndex(p => p.key === message.author.id);
@@ -31,7 +31,7 @@ module.exports = async (client, message) => {
         }
         newLevel = pairs[index].value.level;
     }
-    service.writeFile(pairs);
+    service.writeFile(pairs, 'levels.json');
 
     await console.log(`${message.author.tag}, du hast jetzt ${newXP} XP und bist level: ${newLevel}!`);
 }
