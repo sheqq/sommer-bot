@@ -6,8 +6,9 @@ function storeColorRole(color, role) {
 
     const index = pairs.findIndex(p => p.key === color);
     if (index === -1) {
-        pairs.push({key: color, value: role});
+        pairs.push({key: color, value: role, amount: 1});
     } else {
+        pairs[index].amount += 1;
         // what happpens if the role is already inside the json file?
         // amount attribute needs to be implemented into each json object wich increases for users with the same color
     }
@@ -43,4 +44,4 @@ function removeColorRole(guild, color) {
     service.writeFile(pairs, 'colorRoles.json');
 }
 
-module.exports = { storeColorRole, createRandomColor, createColorRole, getColorRole };
+module.exports = { storeColorRole, createRandomColor, createColorRole, getColorRole, removeColorRole };

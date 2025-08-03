@@ -7,5 +7,9 @@ const {storeColorRole, createRandomColor, createColorRole, getColorRole, removeC
  * @param {GuildMember} member
  */
 module.exports = async (client, member) => {
-
+    const currentColorRoleInJson = getColorRole(member.roles.color)
+    currentColorRoleInJson.amount--;
+    if (currentColorRoleInJson.amount === 0) {
+        removeColorRole(member.guild, currentColorRoleInJson.key);
+    }
 }
