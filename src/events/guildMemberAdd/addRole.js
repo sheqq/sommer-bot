@@ -8,6 +8,7 @@ const {storeColorRole, createRandomColor, createColorRole, getColorRole} = requi
  */
 module.exports = async (client, member) => {
 
+    if (member.user.bot) return;
     const color = createRandomColor();
     console.log(color);
 
