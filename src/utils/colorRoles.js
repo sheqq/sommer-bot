@@ -1,7 +1,6 @@
 const roleService = require("../services/jsonService.js");
 const service = roleService(null,null);
 
-
 function storeColorRole(color, role) {
     let pairs = service.getFile('colorRoles.json');
 
@@ -35,6 +34,13 @@ function getColorRole(color) {
     const pairs = service.getFile('colorRoles.json');
     const pair = pairs.find(p => p.key === color);
     return pair ? pair : null;
+}
+
+function removeColorRole(guild, color) {
+    let pairs = service.getFile('colorRoles.json');
+    const index = pairs.findIndex(p => p.key === color);
+    pairs.splice(index, 1);
+    service.writeFile(pairs, 'colorRoles.json');
 }
 
 module.exports = { storeColorRole, createRandomColor, createColorRole, getColorRole };

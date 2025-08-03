@@ -11,11 +11,11 @@ module.exports = async (client, member) => {
     const color = createRandomColor();
     console.log(color);
 
-    let role = await getColorRole(color);
+    const colorRoleResult = await getColorRole(color);
+    let role = colorRoleResult ? colorRoleResult.value : null;
 
     if(role == null) {
         role = await createColorRole(member.guild, color);
-
     }
     await storeColorRole(color, role);
 
