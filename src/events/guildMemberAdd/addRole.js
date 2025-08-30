@@ -1,5 +1,6 @@
 const {Client, GuildMember} = require("discord.js");
 const {storeColorRole, createRandomColor, createColorRole, getColorRole} = require("../../utils/colorRoles");
+const {userService} = require("../../services/userService");
 
 /**
  *
@@ -23,4 +24,10 @@ module.exports = async (client, member) => {
     // Rolle zuweisen
     await member.roles.add(role);
 
+    // User im Backend speichern / aktualisieren
+    try {
+        await userService.upsertDiscordMember(member, color);
+    } catch (e) {
+        console.error('Konnte Member nicht speichern:', e.message);
+    }
 }

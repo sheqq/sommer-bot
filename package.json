@@ -9,11 +9,15 @@
   "main": "src/index.js",
   "start": "src/index.js",
   "scripts": {
-    "test": "test"
+    "test": "test",
+    "gen:api": "openapi-generator-cli generate -i src/api/sommer-facade.yaml -g typescript-axios -o src/generated/sommer --additional-properties=supportsES6=true,withSeparateModelsAndApi=true,apiPackage=services,modelPackage=models,modelPropertyNaming=original --global-property=apiTests=false,modelTests=false,apiDocs=false,modelDocs=false"
   },
   "dependencies": {
     "discord.js": "^14.21.0",
     "dotenv": "^17.2.0",
     "typescript": "^5.8.3"
+  },
+  "devDependencies": {
+    "@openapitools/openapi-generator-cli": "^2.23.1"
   }
 }

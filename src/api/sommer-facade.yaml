@@ -1,0 +1,133 @@
+swagger: "2.0"
+info:
+  title: sommer-facade
+  description: REST API für sommer.de
+  version: 1.0.0
+basePath: /api/v1
+consumes:
+  - application/json
+produces:
+  - application/json
+
+tags:
+  - name: user
+    description: Operationen rund um Nutzer
+
+paths:
+  /users:
+    get:
+      tags:
+        - user
+      operationId: getAllUsers
+      summary: Get all users
+      responses:
+        200:
+          description: Liste aller Nutzer
+          schema:
+            type: array
+            items:
+              $ref: '#/definitions/User'
+    post:
+      tags:
+        - user
+      operationId: createUser
+      summary: Neuen Nutzer erstellen (Client liefert id)
+      parameters:
+        - in: body
+          name: user
+          required: true
+          schema:
+            $ref: '#/definitions/User'
+      responses:
+        201:
+          description: Nutzer erfolgreich erstellt
+          schema:
+            $ref: '#/definitions/User'
+
+  /users/{userId}:
+    get:
+      tags:
+        - user
+      operationId: getUserById
+      summary: Nutzer nach ID abrufen
+      parameters:
+        - in: path
+          name: userId
+          required: true
+          type: string
+      responses:
+        200:
+          description: Nutzer gefunden
+          schema:
+            $ref: '#/definitions/User'
+        404:
+          description: Nutzer nicht gefunden
+    put:
+      tags:
+        - user
+      operationId: updateUser
+      summary: Nutzer aktualisieren (Body.id soll mit Pfad-ID übereinstimmen)
+      parameters:
+        - in: path
+          name: userId
+          required: true
+          type: string
+        - in: body
+          name: user
+          required: true
+          schema:
+            $ref: '#/definitions/User'
+      responses:
+        200:
+          description: Nutzer erfolgreich aktualisiert
+          schema:
+            $ref: '#/definitions/User'
+        404:
+          description: Nutzer nicht gefunden
+    delete:
+      tags:
+        - user
+      operationId: deleteUser
+      summary: Nutzer löschen
+      parameters:
+        - in: path
+          name: userId
+          required: true
+          type: string
+      responses:
+        204:
+          description: Nutzer erfolgreich gelöscht
+        404:
+          description: Nutzer nicht gefunden
+
+definitions:
+  UserAttributes:
+    type: object
+    required:
+      - id
+      - username
+    properties:
+      id:
+        type: string
+        example: "2347247625478"
+      username:
+        type: string
+        example: "Max"
+      member:
+        type: array
+        items:
+          type: string
+          format: date
+        example: ["2025-08-27", "2025-09-01"]
+      level:
+        type: integer
+        example: 5
+      color:
+        type: string
+        example: "#FF5733"
+
+  User:
+    allOf:
+      - $ref: '#/definitions/UserAttributes'
+      - type: object
+        properties: {}
