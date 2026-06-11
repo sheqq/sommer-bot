@@ -1,3 +1,6 @@
 .env
+.idea/
+node_modules/
+src/generated/
 src/services/levels.json
 src/services/colorRoles.json

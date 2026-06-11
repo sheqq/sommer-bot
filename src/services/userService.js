@@ -1,7 +1,27 @@
-// Datei: src/services/userService.js
 const axios = require('axios');
-const { Configuration } = require('../generated/sommer/configuration');
-const { UserApiFp } = require('../generated/sommer/services/user-api');
+const path = require('path');
+
+let cachedApiFactory = null;
+
+function loadGeneratedApi() {
+    if (cachedApiFactory) {
+        return cachedApiFactory;
+    }
+
+    try {
+        const { Configuration } = require(path.join(__dirname, '..', 'generated', 'sommer', 'configuration'));
+        const { UserApiFp } = require(path.join(__dirname, '..', 'generated', 'sommer', 'services', 'user-api'));
+
+        cachedApiFactory = { Configuration, UserApiFp };
+        return cachedApiFactory;
+    } catch (error) {
+        const wrapped = new Error(
+            'Der generierte OpenAPI-Client fehlt. Bitte zuerst `npm run gen:api` ausführen.'
+        );
+        wrapped.cause = error;
+        throw wrapped;
+    }
+}
 
 function apiToDomain(apiUser) {
     if (!apiUser) return null;
@@ -28,6 +48,7 @@ function domainToApi(domainUser) {
 }
 
 function createUserService(options = {}) {
+    const { Configuration, UserApiFp } = loadGeneratedApi();
     const {
         baseURL = process.env.API_BASE_URL || 'http://localhost:8080/api/v1',
         axiosInstance = axios.create({ baseURL }),
@@ -35,8 +56,7 @@ function createUserService(options = {}) {
     } = options;
 
     const fp = UserApiFp(configuration);
-
-    async function run(requestFactory) {
+    const run = async (requestFactory) => {
         try {
             const request = await requestFactory;
             const response = await request(axiosInstance, '');
@@ -44,15 +64,15 @@ function createUserService(options = {}) {
         } catch (err) {
             const status = err?.response?.status;
             const data = err?.response?.data;
-            const msg = `API Fehler${status ? ' ' + status : ''}: ${err.message}`;
-            const wrapped = new Error(msg);
+            const message = `API-Fehler${status ? ` ${status}` : ''}: ${err.message}`;
+            const wrapped = new Error(message);
             wrapped.status = status;
             wrapped.data = data;
             throw wrapped;
         }
-    }
+    };
 
-    async function tryGet(id) {
+    const tryGet = async (id) => {
         try {
             const data = await run(fp.getUserById(id));
             return apiToDomain(data);
@@ -60,14 +80,9 @@ function createUserService(options = {}) {
             if (e.status === 404) return null;
             throw e;
         }
-    }
+    };
 
-    return {
-        async listUsers() {
-            const data = await run(fp.getAllUsers());
-            return Array.isArray(data) ? data.map(apiToDomain) : [];
-        },
-
+    const service = {
         async getUser(id) {
             const data = await run(fp.getUserById(id));
             return apiToDomain(data);
@@ -85,35 +100,48 @@ function createUserService(options = {}) {
             return apiToDomain(data);
         },
 
-        async deleteUser(id) {
-            await run(fp.deleteUser(id));
-            return true;
-        },
-
-        // Neu: Discord Member speichern / upsert
         async upsertDiscordMember(guildMember, colorHex) {
             const id = guildMember.id;
             const name = guildMember.user?.username || guildMember.displayName;
             const color = (colorHex || '#000000').toUpperCase();
             const existing = await tryGet(id);
+
             if (!existing) {
-                return await this.createUser({ id, name, color });
+                return service.createUser({ id, name, color });
             }
-            // Nur aktualisieren falls Farbe geändert
+
             if (existing.color !== color) {
-                return await this.updateUser(id, { ...existing, name, color });
+                return service.updateUser(id, { ...existing, name, color });
             }
+
             return existing;
         },
 
-        _mapping: { apiToDomain, domainToApi },
         _axios: axiosInstance,
     };
+
+    return service;
 }
 
-const defaultUserService = createUserService();
+let defaultUserService;
+
+function getDefaultUserService() {
+    if (!defaultUserService) {
+        defaultUserService = createUserService();
+    }
+
+    return defaultUserService;
+}
+
+const userService = new Proxy({}, {
+    get(_target, prop) {
+        const service = getDefaultUserService();
+        const value = service[prop];
+
+        return typeof value === 'function' ? value.bind(service) : value;
+    },
+});
 
 module.exports = {
-    createUserService,
-    userService: defaultUserService,
+    userService,
 };

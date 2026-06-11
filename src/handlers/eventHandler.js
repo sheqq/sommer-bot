@@ -2,25 +2,27 @@ const path = require('path');
 const getAllFiles = require('../utils/getAllFiles');
 
 module.exports = (client) => {
-    const eventFolders = getAllFiles(path.join(__dirname, '..' , 'events'), true);
-    console.log(eventFolders.toString());
+    const eventFolders = getAllFiles(path.join(__dirname, '..', 'events'), true);
 
     for (const eventFolder of eventFolders) {
-        const eventFiles = getAllFiles(eventFolder);
-        eventFiles.sort((a, b) => a > b);
+        const eventFiles = getAllFiles(eventFolder).sort((a, b) => a.localeCompare(b));
+        const eventName = path.basename(eventFolder);
 
-        const eventName = eventFolder.replace(/\\/g, '/').split('/').pop();
-
-
-
-        client.on(eventName, async (arg) => {
+        client.on(eventName, async (...args) => {
             for (const eventFile of eventFiles) {
-                const eventFunction = require(eventFile);
-                // Prüfung hinzufügen
+                let eventFunction;
+
+                try {
+                    eventFunction = require(eventFile);
+                } catch (error) {
+                    console.error(`Konnte Event-Datei ${eventFile} nicht laden:`, error);
+                    continue;
+                }
+
                 if (typeof eventFunction === 'function') {
-                    await eventFunction(client, arg);
+                    await eventFunction(client, ...args);
                 } else {
-                    console.error(`Event file ${eventFile} does not export a function:`, typeof eventFunction);
+                    console.warn(`Event-Datei ${eventFile} exportiert keine Funktion.`);
                 }
             }
         });

@@ -1,37 +1,40 @@
-const {Client, Message} = require("discord.js");
 const levelService = require("../../services/jsonService.js");
 
-/**
- *
- * @param {Client} client
- * @param {Message} message
- */
-module.exports = async (client, message) => {
-    if (message.author.bot || !message.guild) return; // Ignoriere Bot-Nachrichten und Nachrichten außerhalb von Servern
+const LEVEL_SYSTEM_ENABLED = true;
+const XP_PER_MESSAGE = 10;
 
-    //levelService.getFile()
-    const service = levelService(client,null);
-    let pairs = service.getFile('levels.json');
+module.exports = async (_client, message) => {
+    if (message.author.bot || !message.guild) return;
 
-    //
-    const index = pairs.findIndex(p => p.key === message.author.id);
-    if (index === -1) {
-        pairs.push({key: message.author.id, value: {xp: 10, level: 1}});
-        newXP = pairs[pairs.length - 1].value.xp;
-        newLevel = pairs[pairs.length - 1].value.level;
-    } else {
-        pairs[index].value.xp += 10;
-        newXP = pairs[index].value.xp;
-        const nextLevelXp = pairs[index].value.level * 100;
+    if (!LEVEL_SYSTEM_ENABLED) return;
 
-        if (pairs[index].value.xp >= nextLevelXp) {
-            pairs[index].value.level += 1;
-            pairs[index].value.xp = 0;
-            message.channel.send(`${message.author.tag}, du bist jetzt Level ${pairs[index].value.level}!`);
-        }
-        newLevel = pairs[index].value.level;
+    const service = levelService();
+    const fileName = 'levels.json';
+    const pairs = service.getFile(fileName);
+
+    let entry = pairs.find((pair) => pair.key === message.author.id);
+
+    if (!entry) {
+        entry = { key: message.author.id, value: { xp: 0, level: 1 } };
+        pairs.push(entry);
     }
-    service.writeFile(pairs, 'levels.json');
 
-    await console.log(`${message.author.tag}, du hast jetzt ${newXP} XP und bist level: ${newLevel}!`);
-}
+    const currentLevel = Number(entry.value?.level) || 1;
+    const currentXP = Number(entry.value?.xp) || 0;
+    let updatedXP = currentXP + XP_PER_MESSAGE;
+    let updatedLevel = currentLevel;
+    let nextLevelXp = updatedLevel * 100;
+
+    while (updatedXP >= nextLevelXp) {
+        updatedXP -= nextLevelXp;
+        updatedLevel += 1;
+        nextLevelXp = updatedLevel * 100;
+        await message.channel.send(`${message.author.tag}, du bist jetzt Level ${updatedLevel}!`);
+    }
+
+    entry.value.xp = updatedXP;
+    entry.value.level = updatedLevel;
+    service.writeFile(pairs, fileName);
+
+    console.log(`${message.author.tag}, du hast jetzt ${updatedXP} XP und bist Level ${updatedLevel}!`);
+};

@@ -1,6 +1,14 @@
-require('dotenv').config();
+const path = require('path');
+require('dotenv').config({ path: path.resolve(__dirname, '..', '.env') });
 const { Client, IntentsBitField } = require('discord.js');
 const eventHandler = require('./handlers/eventHandler');
+
+const token = process.env.TOKEN?.trim();
+
+if (!token) {
+    console.error('Fehler: `TOKEN` fehlt in der `.env`. Bitte einen gültigen Discord Bot Token eintragen.');
+    process.exit(1);
+}
 
 const client = new Client({
     intents: [
@@ -13,40 +21,15 @@ const client = new Client({
     ],
 });
 
-// client.on('ready', () => {
-//     console.log(`Logged in as ${client.user.tag}!`);
-// });
-//
-// client.on('messageCreate', msg => {
-//     if (!msg.author.bot) {
-//         msg.reply(msg.content + ".");
-//     }
-// });
-//
-// client.on('interactionCreate', (interaction) => {
-//     if(!interaction.isCommand()) return;
-//
-//     if(interaction.commandName === 'avatar') {
-//         const user = interaction.options.getUser('user') || interaction.user;
-//         interaction.reply({ content: user.displayAvatarURL({ dynamic: false, size: 2048 })});
-//     }
-//
-//     if(interaction.commandName === 'clear') {
-//         const amount = interaction.options.getInteger('amount') || 1;
-//         if (amount < 1 || amount > 100) {
-//             interaction.reply({ content: 'Bitte gib eine Zahl zwischen 1 und 100 an.'});
-//             return;
-//         }
-//         interaction.channel.bulkDelete(amount, true)
-//             .then(deleted => {
-//                 interaction.reply({ content: `Es wurden ${deleted.size} Nachrichten gelöscht.`});
-//             })
-//             .catch(() => {
-//                 interaction.reply({ content: 'Fehler beim Löschen der Nachrichten.'});
-//             });
-//     }
-// });
-
 eventHandler(client);
 
-client.login(process.env.TOKEN);
+
+client.login(token).catch(error => {
+    if (error?.code === 'TokenInvalid') {
+        console.error('Fehler: Der Discord Token ist ungültig. Bitte einen neuen Bot Token im Discord Developer Portal erstellen und in der `.env` hinterlegen.');
+    } else {
+        console.error('Fehler beim Start des Bots:', error);
+    }
+
+    process.exit(1);
+});

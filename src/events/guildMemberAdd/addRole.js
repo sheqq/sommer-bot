@@ -1,33 +1,15 @@
-const {Client, GuildMember} = require("discord.js");
-const {storeColorRole, createRandomColor, createColorRole, getColorRole} = require("../../utils/colorRoles");
-const {userService} = require("../../services/userService");
+const { assignColorToMember } = require('../../utils/colorRoles');
+const { userService } = require('../../services/userService');
 
-/**
- *
- * @param {Client} client
- * @param {GuildMember} member
- */
-module.exports = async (client, member) => {
-
+module.exports = async (_client, member) => {
     if (member.user.bot) return;
-    const color = createRandomColor();
-    console.log(color);
 
-    const colorRoleResult = await getColorRole(color);
-    let role = colorRoleResult ? colorRoleResult.value : null;
-
-    if(role == null) {
-        role = await createColorRole(member.guild, color);
-    }
-    await storeColorRole(color, role);
-
-    // Rolle zuweisen
-    await member.roles.add(role);
-
-    // User im Backend speichern / aktualisieren
     try {
-        await userService.upsertDiscordMember(member, color);
+        const chosenColor = '#' + (Math.random() * 0xFFFFFF << 0).toString(16).padStart(6, '0');
+        await assignColorToMember(member, chosenColor);
+
+        await userService.upsertDiscordMember(member, chosenColor);
     } catch (e) {
-        console.error('Konnte Member nicht speichern:', e.message);
+        console.error('Konnte Member nicht speichern/Onboarding nicht abschließen:', e?.message || e);
     }
-}
+};

@@ -4,13 +4,16 @@
   "description": "discord bot for the discord server sommer",
   "license": "ISC",
   "author": "sheqq",
-  "nodeVersion": "22.13.1",
   "type": "commonjs",
   "main": "src/index.js",
-  "start": "src/index.js",
   "scripts": {
-    "test": "test",
+    "start": "node src/index.js",
+    "check": "node scripts/check.js",
+    "test": "npm run check",
     "gen:api": "openapi-generator-cli generate -i src/api/sommer-facade.yaml -g typescript-axios -o src/generated/sommer --additional-properties=supportsES6=true,withSeparateModelsAndApi=true,apiPackage=services,modelPackage=models,modelPropertyNaming=original --global-property=apiTests=false,modelTests=false,apiDocs=false,modelDocs=false"
+  },
+  "engines": {
+    "node": ">=22.13.1"
   },
   "dependencies": {
     "discord.js": "^14.21.0",
