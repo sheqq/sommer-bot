@@ -2,7 +2,7 @@ const fs = require('fs');
 const path = require('path');
 
 module.exports = () => {
-    const resolveFilePath = (filename) => path.join(__dirname, filename);
+    const resolveFilePath = (filename) => path.join(__dirname, '..', '..', 'data', filename);
 
     function getFile(filename) {
         const filePath = resolveFilePath(filename);
