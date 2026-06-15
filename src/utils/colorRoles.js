@@ -75,14 +75,21 @@ async function ensureRoleForColor(guild, color) {
 async function assignColorToMember(member, color) {
     const role = await ensureRoleForColor(member.guild, color);
 
-    await member.roles.add(role);
-    upsertColorRoleEntry(color, 1);
+    if (!member.roles.cache.has(role.id)) {
+        await member.roles.add(role);
+    }
+
+    service.addEntry('colorRoles.json', color, {
+        amount: role.members.size
+    });
+
     return role;
 }
 
 async function unassignColorFromMember(member) {
     const memberRoleNames = new Set(member.roles.cache.map((role) => role.name));
-    const pair = loadColorRoles().find((entry) => memberRoleNames.has(entry.key));
+    const pair = [...member.roles.cache.values()]
+        .find(role => /^#[0-9A-F]{6}$/i.test(role.name));
 
     if (!pair) return null;
 
@@ -90,18 +97,32 @@ async function unassignColorFromMember(member) {
     const role = member.guild.roles.cache.find((r) => r.name === color) || null;
 
     if (role) {
-        await member.roles.remove(role).catch(() => null);
+        try {
+            await member.roles.remove(role);
+        } catch {
+            return null;
+        }
     }
 
     const updated = decrementColorRoleEntry(color);
+
     if (!updated || updated.amount === 0) {
         if (role) {
             await role.delete().catch(() => null);
         }
-        return { key: color, amount: 0, removed: true };
+
+        return {
+            key: color,
+            amount: 0,
+            removed: true,
+        };
     }
 
-    return { key: color, amount: updated.amount, removed: false };
+    return {
+        key: color,
+        amount: updated.amount,
+        removed: false,
+    };
 }
 
 module.exports = {
