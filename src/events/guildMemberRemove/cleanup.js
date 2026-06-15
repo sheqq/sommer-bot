@@ -11,15 +11,9 @@ module.exports = async (_client, member) => {
         await unassignColorFromMember(member);
 
         // Level des Users entfernen
-        const levels = service.getFile('levels.json');
-        const index = levels.findIndex((entry) => entry.key === member.user.id);
-
-        if (index !== -1) {
-            const removed = levels.splice(index, 1);
-            if (removed.length > 0) {
-                service.writeFile(levels, 'levels.json');
-                console.log(`Level-Daten entfernt für Member ${member.user.tag}`);
-            }
+        const removed = service.removeEntry('levels.json', member.user.id);
+        if (removed) {
+            console.log(`Level-Daten entfernt für Member ${member.user.tag}`);
         }
     } catch (error) {
         console.error('Fehler beim Entfernen der Daten für Member:', error?.message || error);

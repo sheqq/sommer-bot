@@ -42,8 +42,44 @@ module.exports = () => {
         }
     }
 
+    function getEntry(filename, key) {
+        const entries = getFile(filename);
+        return entries.find((entry) => entry.key === key) || null;
+    }
+
+    function addEntry(filename, key, value) {
+        const entries = getFile(filename);
+        const index = entries.findIndex((entry) => entry.key === key);
+
+        if (index === -1) {
+            entries.push({ key, value });
+        } else {
+            entries[index].value = value;
+        }
+
+        writeFile(entries, filename);
+        return { key, value };
+    }
+
+    function removeEntry(filename, key) {
+        const entries = getFile(filename);
+        const index = entries.findIndex((entry) => entry.key === key);
+
+        if (index === -1) {
+            return null;
+        }
+
+        const removed = entries[index];
+        entries.splice(index, 1);
+        writeFile(entries, filename);
+        return removed;
+    }
+
     return {
         getFile,
-        writeFile
+        writeFile,
+        getEntry,
+        addEntry,
+        removeEntry
     };
 };

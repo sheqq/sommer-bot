@@ -20,65 +20,46 @@ function createRandomColor() {
     return '#'+(Math.random() * 0xFFFFFF << 0).toString(16).padStart(6, '0');
 }
 
-function normalizeColorRoleEntry(entry) {
-    if (!entry || typeof entry.key !== 'string') {
-        return null;
-    }
-
+function getColorRole(color) {
+    const entry = service.getEntry('colorRoles.json', color);
+    if (!entry) return null;
     return {
         key: entry.key,
-        amount: Number(entry.amount) || 0,
+        amount: Number(entry.value?.amount) || 0,
     };
 }
 
-function loadColorRoles() {
-    return service.getFile('colorRoles.json')
-        .map(normalizeColorRoleEntry)
-        .filter(Boolean);
-}
-
-function saveColorRoles(entries) {
-    service.writeFile(
-        entries.map((entry) => ({ key: entry.key, amount: Number(entry.amount) || 0 })),
-        'colorRoles.json'
-    );
-}
-
-function getColorRole(color) {
-    return loadColorRoles().find((entry) => entry.key === color) || null;
-}
-
 function upsertColorRoleEntry(color, delta = 1) {
-    const entries = loadColorRoles();
-    const index = entries.findIndex((entry) => entry.key === color);
+    const existing = service.getEntry('colorRoles.json', color);
+    const currentAmount = existing ? Number(existing.value?.amount) || 0 : 0;
+    const newAmount = Math.max(currentAmount + delta, 0);
 
-    if (index === -1) {
-        entries.push({ key: color, amount: Math.max(delta, 0) });
-    } else {
-        entries[index].amount = Math.max((entries[index].amount || 0) + delta, 0);
-    }
-
-    saveColorRoles(entries);
+    service.addEntry('colorRoles.json', color, { amount: newAmount });
     return getColorRole(color);
 }
 
 function decrementColorRoleEntry(color) {
-    const entries = loadColorRoles();
-    const index = entries.findIndex((entry) => entry.key === color);
+    const existing = service.getEntry('colorRoles.json', color);
+    if (!existing) return null;
 
-    if (index === -1) {
-        return null;
+    const currentAmount = Number(existing.value?.amount) || 0;
+    const newAmount = Math.max(currentAmount - 1, 0);
+
+    if (newAmount === 0) {
+        const removed = service.removeEntry('colorRoles.json', color);
+        return removed ? { key: removed.key, amount: 0, removed: true } : null;
     }
 
-    entries[index].amount = Math.max((entries[index].amount || 0) - 1, 0);
+    service.addEntry('colorRoles.json', color, { amount: newAmount });
+    return { key: color, amount: newAmount, removed: false };
+}
 
-    const updated = entries[index];
-    if (updated.amount === 0) {
-        entries.splice(index, 1);
-    }
-
-    saveColorRoles(entries);
-    return updated;
+function loadColorRoles() {
+    return service.getFile('colorRoles.json')
+        .map((entry) => ({
+            key: entry.key,
+            amount: Number(entry.value?.amount) || 0,
+        }));
 }
 
 async function ensureRoleForColor(guild, color) {
@@ -129,7 +110,5 @@ module.exports = {
     getColorRole,
     assignColorToMember,
     unassignColorFromMember,
-    loadColorRoles,
-    saveColorRoles,
 };
 

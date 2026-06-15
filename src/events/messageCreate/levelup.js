@@ -13,17 +13,18 @@ module.exports = async (_client, message) => {
 
     const service = levelService();
     const fileName = 'levels.json';
-    const pairs = service.getFile(fileName);
+    const userId = message.author.id;
 
-    let entry = pairs.find((pair) => pair.key === message.author.id);
+    let entry = service.getEntry(fileName, userId);
 
-    if (!entry) {
-        entry = { key: message.author.id, value: { xp: 0, level: 1 } };
-        pairs.push(entry);
+    let currentLevel = 1;
+    let currentXP = 0;
+
+    if (entry) {
+        currentLevel = Number(entry.value?.level) || 1;
+        currentXP = Number(entry.value?.xp) || 0;
     }
 
-    const currentLevel = Number(entry.value?.level) || 1;
-    const currentXP = Number(entry.value?.xp) || 0;
     let updatedXP = currentXP + XP_PER_MESSAGE;
     let updatedLevel = currentLevel;
     let nextLevelXp = updatedLevel * 100;
@@ -35,9 +36,7 @@ module.exports = async (_client, message) => {
         await message.channel.send(`${message.author.tag}, du bist jetzt Level ${updatedLevel}!`);
     }
 
-    entry.value.xp = updatedXP;
-    entry.value.level = updatedLevel;
-    service.writeFile(pairs, fileName);
+    service.addEntry(fileName, userId, { xp: updatedXP, level: updatedLevel });
 
     console.log(`${message.author.tag}, du hast jetzt ${updatedXP} XP und bist Level ${updatedLevel}!`);
 };
