@@ -1,6 +1,7 @@
 const fs = require('fs');
 const path = require('path');
 
+// get add und remove hier implementieren
 module.exports = () => {
     const resolveFilePath = (filename) => path.join(__dirname, '..', '..', 'data', filename);
 
