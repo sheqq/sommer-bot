@@ -6,6 +6,9 @@ const XP_PER_MESSAGE = 10;
 module.exports = async (_client, message) => {
     if (message.author.bot || !message.guild) return;
 
+    // Ignoriere System-Nachrichten (z.B. Willkommensnachrichten)
+    if (message.system) return;
+
     if (!LEVEL_SYSTEM_ENABLED) return;
 
     const service = levelService();
