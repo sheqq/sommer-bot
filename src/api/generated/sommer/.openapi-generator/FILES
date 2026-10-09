@@ -1,0 +1,13 @@
+.babelrc
+.gitignore
+.openapi-generator-ignore
+.travis.yml
+README.md
+git_push.sh
+mocha.opts
+package.json
+src/ApiClient.js
+src/index.js
+src/models/User.js
+src/models/UserAttributes.js
+src/services/UserApi.js
