@@ -1,5 +1,6 @@
 const { ApplicationCommandOptionType, PermissionFlagsBits } = require('discord.js');
 const levelService = require('../../services/jsonService.js');
+const { getXpProgress } = require('../../utils/levels');
 
 module.exports = {
     name: 'level',
@@ -27,9 +28,7 @@ module.exports = {
             });
         }
 
-        const level = entry.value?.level ?? 1;
-        const xp = entry.value?.xp ?? 0;
-        const nextLevelXp = level * 100;
+        const { level, xp, nextLevelXp } = getXpProgress(entry.value);
         const progressText = `${xp}/${nextLevelXp} XP`;
 
         return interaction.reply({
@@ -38,4 +37,3 @@ module.exports = {
         });
     },
 };
-

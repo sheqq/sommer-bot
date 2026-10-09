@@ -1,5 +1,6 @@
 const { ApplicationCommandOptionType, PermissionFlagsBits } = require('discord.js');
 const levelService = require('../../services/jsonService.js');
+const { getLevelFromXp, getXp } = require('../../utils/levels');
 
 module.exports = {
     name: 'leaderboard',
@@ -29,13 +30,12 @@ module.exports = {
             });
         }
 
-        // Sortiere nach Level (absteigend) und dann nach XP (absteigend)
         const sorted = pairs
-            .filter(pair => pair.value?.level)
+            .filter(pair => getXp(pair.value) > 0)
             .sort((a, b) => {
-                const levelDiff = (b.value?.level ?? 0) - (a.value?.level ?? 0);
+                const levelDiff = getLevelFromXp(b.value) - getLevelFromXp(a.value);
                 if (levelDiff !== 0) return levelDiff;
-                return (b.value?.xp ?? 0) - (a.value?.xp ?? 0);
+                return getXp(b.value) - getXp(a.value);
             })
             .slice(0, limit);
 
@@ -51,8 +51,8 @@ module.exports = {
         for (let i = 0; i < sorted.length; i++) {
             const pair = sorted[i];
             const userId = pair.key;
-            const level = pair.value?.level ?? 1;
-            const xp = pair.value?.xp ?? 0;
+            const level = getLevelFromXp(pair.value);
+            const xp = getXp(pair.value);
 
             // Versuche, den Benutzernamen zu erhalten
             let userName = `<@${userId}>`;
@@ -72,4 +72,3 @@ module.exports = {
         });
     },
 };
-

@@ -37,7 +37,10 @@ function assertJsonSyntax(filePath) {
 }
 
 const root = path.resolve(__dirname, '..');
-const jsFiles = collectFiles(path.join(root, 'src'), (filePath) => filePath.endsWith('.js'))
+const generatedDirectory = path.join(root, 'src', 'api', 'generated');
+const jsFiles = collectFiles(path.join(root, 'src'), (filePath) =>
+    filePath.endsWith('.js') && !filePath.startsWith(`${generatedDirectory}${path.sep}`)
+)
     .concat(collectFiles(path.join(root, 'scripts'), (filePath) => filePath.endsWith('.js')));
 const jsonFiles = [
     path.join(root, 'package.json'),
@@ -55,4 +58,3 @@ for (const filePath of jsonFiles) {
 }
 
 console.log(`OK: ${jsFiles.length} JavaScript-Dateien und ${jsonFiles.filter(fs.existsSync).length} JSON-Dateien geprüft.`);
-

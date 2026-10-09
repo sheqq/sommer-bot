@@ -13,9 +13,12 @@ module.exports = async (client) => {
         );
 
         for (const [, role] of colorRoles) {
-            service.addEntry('colorRoles.json', role.name, {
-                amount: role.members.size
-            });
+            const amount = role.members.size;
+            if (amount === 0) {
+                service.removeEntry('colorRoles.json', role.name);
+            } else {
+                service.addEntry('colorRoles.json', role.name, String(amount));
+            }
         }
     }
 

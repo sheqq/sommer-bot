@@ -1,4 +1,5 @@
 const levelService = require("../../services/jsonService.js");
+const { getLevelFromXp, getXp } = require('../../utils/levels');
 
 const LEVEL_SYSTEM_ENABLED = true;
 const XP_PER_MESSAGE = 10;
@@ -17,26 +18,16 @@ module.exports = async (_client, message) => {
 
     let entry = service.getEntry(fileName, userId);
 
-    let currentLevel = 1;
-    let currentXP = 0;
+    const currentXP = entry ? getXp(entry.value) : 0;
+    const updatedXP = currentXP + XP_PER_MESSAGE;
+    const oldLevel = getLevelFromXp(currentXP);
+    const updatedLevel = getLevelFromXp(updatedXP);
 
-    if (entry) {
-        currentLevel = Number(entry.value?.level) || 1;
-        currentXP = Number(entry.value?.xp) || 0;
-    }
-
-    let updatedXP = currentXP + XP_PER_MESSAGE;
-    let updatedLevel = currentLevel;
-    let nextLevelXp = updatedLevel * 100;
-
-    while (updatedXP >= nextLevelXp) {
-        updatedXP -= nextLevelXp;
-        updatedLevel += 1;
-        nextLevelXp = updatedLevel * 100;
+    if (updatedLevel > oldLevel) {
         await message.channel.send(`${message.author.tag}, du bist jetzt Level ${updatedLevel}!`);
     }
 
-    service.addEntry(fileName, userId, { xp: updatedXP, level: updatedLevel });
+    service.addEntry(fileName, userId, String(updatedXP));
 
     console.log(`${message.author.tag}, du hast jetzt ${updatedXP} XP und bist Level ${updatedLevel}!`);
 };

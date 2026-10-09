@@ -25,16 +25,24 @@ function getColorRole(color) {
     if (!entry) return null;
     return {
         key: entry.key,
-        amount: Number(entry.value?.amount) || 0,
+        amount: getAmount(entry.value),
     };
+}
+
+function getAmount(value) {
+    return Number(typeof value === 'object' ? value?.amount : value) || 0;
 }
 
 function upsertColorRoleEntry(color, delta = 1) {
     const existing = service.getEntry('colorRoles.json', color);
-    const currentAmount = existing ? Number(existing.value?.amount) || 0 : 0;
+    const currentAmount = existing ? getAmount(existing.value) : 0;
     const newAmount = Math.max(currentAmount + delta, 0);
 
-    service.addEntry('colorRoles.json', color, { amount: newAmount });
+    if (newAmount === 0) {
+        service.removeEntry('colorRoles.json', color);
+    } else {
+        service.addEntry('colorRoles.json', color, String(newAmount));
+    }
     return getColorRole(color);
 }
 
@@ -42,7 +50,7 @@ function decrementColorRoleEntry(color) {
     const existing = service.getEntry('colorRoles.json', color);
     if (!existing) return null;
 
-    const currentAmount = Number(existing.value?.amount) || 0;
+    const currentAmount = getAmount(existing.value);
     const newAmount = Math.max(currentAmount - 1, 0);
 
     if (newAmount === 0) {
@@ -50,7 +58,7 @@ function decrementColorRoleEntry(color) {
         return removed ? { key: removed.key, amount: 0, removed: true } : null;
     }
 
-    service.addEntry('colorRoles.json', color, { amount: newAmount });
+    service.addEntry('colorRoles.json', color, String(newAmount));
     return { key: color, amount: newAmount, removed: false };
 }
 
@@ -58,7 +66,7 @@ function loadColorRoles() {
     return service.getFile('colorRoles.json')
         .map((entry) => ({
             key: entry.key,
-            amount: Number(entry.value?.amount) || 0,
+            amount: getAmount(entry.value),
         }));
 }
 
@@ -79,21 +87,23 @@ async function assignColorToMember(member, color) {
         await member.roles.add(role);
     }
 
-    service.addEntry('colorRoles.json', color, {
-        amount: role.members.size
-    });
+    const amount = role.members.size;
+    if (amount === 0) {
+        service.removeEntry('colorRoles.json', color);
+    } else {
+        service.addEntry('colorRoles.json', color, String(amount));
+    }
 
     return role;
 }
 
 async function unassignColorFromMember(member) {
-    const memberRoleNames = new Set(member.roles.cache.map((role) => role.name));
     const pair = [...member.roles.cache.values()]
         .find(role => /^#[0-9A-F]{6}$/i.test(role.name));
 
     if (!pair) return null;
 
-    const color = pair.key;
+    const color = pair.name;
     const role = member.guild.roles.cache.find((r) => r.name === color) || null;
 
     if (role) {
@@ -132,4 +142,3 @@ module.exports = {
     assignColorToMember,
     unassignColorFromMember,
 };
-

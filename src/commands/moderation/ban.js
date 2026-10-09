@@ -1,4 +1,6 @@
 const { ApplicationCommandOptionType, PermissionFlagsBits } = require('discord.js');
+const { unassignColorFromMember } = require('../../utils/colorRoles');
+const jsonService = require('../../services/jsonService.js');
 
 module.exports = {
     name: 'ban',
@@ -33,6 +35,8 @@ module.exports = {
             return interaction.reply({ content: 'Nutzer nicht gefunden.', ephemeral: true });
         }
 
+        await unassignColorFromMember(member);
+        jsonService().removeEntry('levels.json', user.id);
         await member.ban({ reason });
         await interaction.reply({ content: `Nutzer **${user.tag}** wurde gebannt. Grund: ${reason}` });
     },
