@@ -135,10 +135,37 @@ async function unassignColorFromMember(member) {
     };
 }
 
+async function cleanupColorRoleAfterMemberLeave(member) {
+    const colorRole = [...member.roles.cache.values()]
+        .find((role) => /^#[0-9A-F]{6}$/i.test(role.name));
+
+    if (!colorRole) return null;
+
+    const color = colorRole.name;
+    const role = member.guild.roles.cache.find((guildRole) => guildRole.id === colorRole.id) || null;
+    const remainingMembers = role
+        ? role.members.filter((roleMember) => roleMember.id !== member.id).size
+        : 0;
+
+    if (remainingMembers === 0) {
+        service.removeEntry('colorRoles.json', color);
+
+        if (role) {
+            await role.delete('Keine Mitglieder mit dieser Farbrolle mehr').catch(() => null);
+        }
+
+        return { key: color, amount: 0, removed: true };
+    }
+
+    service.addEntry('colorRoles.json', color, String(remainingMembers));
+    return { key: color, amount: remainingMembers, removed: false };
+}
+
 module.exports = {
     createRandomColor,
     createColorRole,
     getColorRole,
     assignColorToMember,
     unassignColorFromMember,
+    cleanupColorRoleAfterMemberLeave,
 };

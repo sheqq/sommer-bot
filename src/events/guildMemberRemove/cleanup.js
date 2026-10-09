@@ -1,4 +1,4 @@
-const { unassignColorFromMember } = require('../../utils/colorRoles');
+const { cleanupColorRoleAfterMemberLeave } = require('../../utils/colorRoles');
 const jsonService = require('../../services/jsonService.js');
 
 module.exports = async (_client, member) => {
@@ -8,7 +8,7 @@ module.exports = async (_client, member) => {
         const service = jsonService();
 
         // Farbrolle des Users entfernen
-        await unassignColorFromMember(member);
+        await cleanupColorRoleAfterMemberLeave(member);
 
         // Level des Users entfernen
         const removed = service.removeEntry('levels.json', member.user.id);
