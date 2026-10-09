@@ -5,6 +5,51 @@ const path = require('path');
 module.exports = () => {
     const resolveFilePath = (filename) => path.join(__dirname, '..', '..', 'data', filename);
 
+    function migrateEntries(filename, entries) {
+        if (filename === 'colorRoles.json') {
+            const migrated = entries
+                .map((entry) => {
+                    const amount = Number(
+                        typeof entry.value === 'object' ? entry.value?.amount : entry.value
+                    ) || 0;
+
+                    return amount > 0
+                        ? { ...entry, value: String(amount) }
+                        : null;
+                })
+                .filter(Boolean);
+
+            return {
+                entries: migrated,
+                changed: JSON.stringify(migrated) !== JSON.stringify(entries),
+            };
+        }
+
+        if (filename === 'levels.json') {
+            const migrated = entries.map((entry) => {
+                if (typeof entry.value !== 'object' || entry.value === null) {
+                    return entry;
+                }
+
+                const level = Math.max(Number(entry.value.level) || 1, 1);
+                const currentXp = Math.max(Number(entry.value.xp) || 0, 0);
+                const completedLevelXp = 100 * ((level - 1) * level / 2);
+
+                return {
+                    ...entry,
+                    value: String(completedLevelXp + currentXp),
+                };
+            });
+
+            return {
+                entries: migrated,
+                changed: JSON.stringify(migrated) !== JSON.stringify(entries),
+            };
+        }
+
+        return { entries, changed: false };
+    }
+
     function getFile(filename) {
         const filePath = resolveFilePath(filename);
 
@@ -17,7 +62,17 @@ module.exports = () => {
 
             try {
                 const parsed = JSON.parse(content);
-                return Array.isArray(parsed) ? parsed : [];
+                if (!Array.isArray(parsed)) {
+                    return [];
+                }
+
+                const migration = migrateEntries(filename, parsed);
+                if (migration.changed) {
+                    writeFile(migration.entries, filename);
+                    console.log(`JSON-Daten migriert: ${filename}`);
+                }
+
+                return migration.entries;
             } catch {
                 return [];
             }
