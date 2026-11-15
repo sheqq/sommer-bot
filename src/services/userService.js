@@ -40,9 +40,14 @@ function createUserService(options = {}) {
     const { ApiClient, UsersApi } = loadGeneratedApi();
     const {
         baseURL = process.env.API_BASE_URL || 'http://localhost:8080/api/v1',
+        apiKey = process.env.API_KEY,
         apiClient = new ApiClient(baseURL),
         usersApi = new UsersApi(apiClient),
     } = options;
+
+    if (apiKey) {
+        apiClient.defaultHeaders['X-API-Key'] = apiKey;
+    }
 
     const run = async (request) => {
         try {

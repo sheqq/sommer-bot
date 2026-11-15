@@ -7,6 +7,9 @@ info:
 servers:
   - url: /api/v1
 
+security:
+  - ApiKeyAuth: []
+
 tags:
   - name: users
     description: Operationen rund um Nutzer
@@ -95,6 +98,11 @@ paths:
           description: Nutzer nicht gefunden
 
 components:
+  securitySchemes:
+    ApiKeyAuth:
+      type: apiKey
+      in: header
+      name: X-API-Key
   schemas:
     User:
       type: object
