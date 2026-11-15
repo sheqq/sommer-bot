@@ -4,6 +4,9 @@ const path = require('path');
 // get add und remove hier implementieren
 module.exports = () => {
     const resolveFilePath = (filename) => path.join(__dirname, '..', '..', 'data', filename);
+    const ensureParentDirectory = (filePath) => {
+        fs.mkdirSync(path.dirname(filePath), { recursive: true });
+    };
 
     function migrateEntries(filename, entries) {
         if (filename === 'colorRoles.json') {
@@ -79,6 +82,7 @@ module.exports = () => {
         }
 
         try {
+            ensureParentDirectory(filePath);
             fs.writeFileSync(filePath, JSON.stringify([], null, 2), 'utf8');
         } catch (error) {
             console.error(`Konnte JSON-Datei nicht anlegen: ${filePath}`, error);
@@ -91,6 +95,7 @@ module.exports = () => {
         const filePath = resolveFilePath(filename);
 
         try {
+            ensureParentDirectory(filePath);
             fs.writeFileSync(filePath, JSON.stringify(content, null, 2), 'utf8');
         } catch (error) {
             console.error(`Konnte JSON-Datei nicht schreiben: ${filePath}`, error);

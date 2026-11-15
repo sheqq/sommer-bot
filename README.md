@@ -5,6 +5,7 @@ Discord-Bot für den Sommer-Server.
 ## Voraussetzungen
 
 - Node.js 22 oder neuer
+- Java im `PATH` (für den OpenAPI-Generator beim Start)
 - Eine Discord-Bot-App mit Token
 - Optional: ein Backend für `src/services/userService.js`
 
@@ -15,6 +16,8 @@ Discord-Bot für den Sommer-Server.
 ```powershell
 npm install
 ```
+
+Der API-Client wird bei jedem `npm start` aus `src/api/sommer-facade.yaml` generiert und für Node.js kompiliert.
 
 2. `.env.example` nach `.env` kopieren und ausfüllen:
 
