@@ -11,7 +11,7 @@
     "start": "node src/index.js",
     "check": "node scripts/check.js",
     "test": "npm run check",
-    "gen:api": "npx --yes --package=@openapitools/openapi-generator-cli@2.42.2 openapi-generator-cli generate -i src/api/sommer-facade.yaml -g javascript -o src/api/generated/sommer --additional-properties=supportsES6=true,usePromises=true,withSeparateModelsAndApi=true,apiPackage=services,modelPackage=models,modelPropertyNaming=original --global-property=apiTests=false,modelTests=false,apiDocs=false,modelDocs=false",
+    "gen:api": "npm exec --yes --package=@openapitools/openapi-generator-cli@2.42.2 -- openapi-generator-cli generate -i src/api/sommer-facade.yaml -g javascript -o src/api/generated/sommer --additional-properties=supportsES6=true,usePromises=true,withSeparateModelsAndApi=true,apiPackage=services,modelPackage=models,modelPropertyNaming=original --global-property=apiTests=false,modelTests=false,apiDocs=false,modelDocs=false",
     "build:api": "babel src/api/generated/sommer/src --out-dir src/api/generated/sommer/dist --no-babelrc --presets @babel/preset-env"
   },
   "engines": {
