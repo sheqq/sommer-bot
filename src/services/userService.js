@@ -67,33 +67,25 @@ function createUserService(options = {}) {
         }
     };
 
-    const tryGet = async (id) => {
-        try {
-            const data = await run(usersApi.getUserById(id));
-            return apiToDomain(data);
-        } catch (e) {
-            if (e.status === 404) return null;
-            throw e;
-        }
-    };
-
     const pendingUpserts = new Map();
-    const upsertUser = async (user) => {
+    const upsertKnownUser = async (user, knownUsers) => {
         const pending = pendingUpserts.get(user.id);
         if (pending) return pending;
 
         const request = (async () => {
-            const existing = await tryGet(user.id);
+            const existing = knownUsers.get(user.id);
+            let result;
 
             if (!existing) {
-                return service.createUser(user);
+                result = await service.createUser(user);
+            } else if (existing.username !== user.username) {
+                result = await service.updateUser(user.id, user);
+            } else {
+                result = existing;
             }
 
-            if (existing.username !== user.username) {
-                return service.updateUser(user.id, user);
-            }
-
-            return existing;
+            knownUsers.set(user.id, result);
+            return result;
         })();
 
         pendingUpserts.set(user.id, request);
@@ -106,7 +98,24 @@ function createUserService(options = {}) {
         }
     };
 
+    const getKnownUsers = async () => {
+        const users = await run(usersApi.getAllUsers());
+        if (!Array.isArray(users)) {
+            throw new Error('API-Fehler: GET /users hat keine Nutzerliste zurückgegeben.');
+        }
+
+        return new Map(users.map(apiToDomain).filter(Boolean).map(user => [user.id, user]));
+    };
+
     const service = {
+        async getAllUsers() {
+            const users = await run(usersApi.getAllUsers());
+            if (!Array.isArray(users)) {
+                throw new Error('API-Fehler: GET /users hat keine Nutzerliste zurückgegeben.');
+            }
+            return users.map(apiToDomain).filter(Boolean);
+        },
+
         async getUser(id) {
             const data = await run(usersApi.getUserById(id));
             return apiToDomain(data);
@@ -124,7 +133,25 @@ function createUserService(options = {}) {
             return apiToDomain(data);
         },
 
-        upsertUser,
+        async upsertUser(user) {
+            const knownUsers = await getKnownUsers();
+            return upsertKnownUser(user, knownUsers);
+        },
+
+        async upsertUsers(users) {
+            const knownUsers = await getKnownUsers();
+            const results = [];
+
+            for (const user of users) {
+                try {
+                    await upsertKnownUser(user, knownUsers);
+                } catch (error) {
+                    results.push({ user, error });
+                }
+            }
+
+            return results;
+        },
     };
 
     return service;

@@ -12,21 +12,22 @@ module.exports = async (guild, cachedMembers = null) => {
         }
     }
 
-    for (const member of members.values()) {
-        if (member.user.bot) continue;
-
-        try {
-            await userService.upsertUser({
+    const users = [...members.values()]
+        .filter(member => !member.user.bot)
+        .map(member => ({
                 id: member.id,
                 username: member.user.username,
-            });
-        } catch (error) {
-            if (!error?.status) {
-                console.error(`API nicht erreichbar; Sync für ${guild.name} abgebrochen:`, error?.message || error);
-                return;
-            }
+            }));
+    let failures;
 
-            console.error(`Konnte Discord-User ${member.id} nicht synchronisieren:`, error?.message || error);
-        }
+    try {
+        failures = await userService.upsertUsers(users);
+    } catch (error) {
+        console.error(`Konnte Nutzerliste für ${guild.name} nicht abrufen:`, error?.message || error);
+        return;
+    }
+
+    for (const { user, error } of failures) {
+        console.error(`Konnte Discord-User ${user.id} nicht synchronisieren:`, error?.message || error);
     }
 };
