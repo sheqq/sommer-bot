@@ -48,12 +48,16 @@ function createUserService(options = {}) {
         try {
             return await request;
         } catch (err) {
-            const status = err?.response?.status || err?.status;
-            const data = err?.response?.body ?? err?.response?.data;
-            const message = `API-Fehler${status ? ` ${status}` : ''}: ${err.message}`;
+            const cause = err?.error ?? err;
+            const status = err?.response?.status || err?.status || cause?.status;
+            const data = err?.response?.body ?? err?.response?.data ?? err?.body;
+            const detail = cause?.message || (typeof cause === 'string' ? cause : 'Unbekannter Fehler');
+            const message = `API-Fehler${status ? ` ${status}` : ''}: ${detail}`;
             const wrapped = new Error(message);
             wrapped.status = status;
             wrapped.data = data;
+            wrapped.code = cause?.code;
+            wrapped.cause = cause;
             throw wrapped;
         }
     };

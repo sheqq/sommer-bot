@@ -21,6 +21,11 @@ module.exports = async (guild, cachedMembers = null) => {
                 username: member.user.username,
             });
         } catch (error) {
+            if (!error?.status) {
+                console.error(`API nicht erreichbar; Sync für ${guild.name} abgebrochen:`, error?.message || error);
+                return;
+            }
+
             console.error(`Konnte Discord-User ${member.id} nicht synchronisieren:`, error?.message || error);
         }
     }
