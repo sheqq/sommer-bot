@@ -29,6 +29,10 @@ paths:
                 type: array
                 items:
                   $ref: '#/components/schemas/User'
+        '401':
+          description: Fehlender oder ungültiger API-Key
+        '500':
+          description: Interner Serverfehler, z. B. durch einen Datenbankfehler
     post:
       tags: [users]
       operationId: createUser
@@ -46,6 +50,12 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/User'
+        '400':
+          description: Ungültige Nutzerdaten, z. B. fehlende ID
+        '401':
+          description: Fehlender oder ungültiger API-Key
+        '500':
+          description: Interner Serverfehler, z. B. durch einen Datenbankfehler
 
   /users/{userId}:
     parameters:
@@ -68,10 +78,14 @@ paths:
                 $ref: '#/components/schemas/User'
         '404':
           description: Nutzer nicht gefunden
+        '401':
+          description: Fehlender oder ungültiger API-Key
+        '500':
+          description: Interner Serverfehler, z. B. durch einen Datenbankfehler
     put:
       tags: [users]
       operationId: updateUser
-      summary: Nutzer aktualisieren (Body.id soll mit Pfad-ID übereinstimmen)
+      summary: Nutzer anhand der Pfad-ID vollständig durch den Body ersetzen
       requestBody:
         required: true
         content:
@@ -87,6 +101,10 @@ paths:
                 $ref: '#/components/schemas/User'
         '404':
           description: Nutzer nicht gefunden
+        '401':
+          description: Fehlender oder ungültiger API-Key
+        '500':
+          description: Interner Serverfehler, z. B. durch einen Datenbankfehler
     delete:
       tags: [users]
       operationId: deleteUser
@@ -96,6 +114,10 @@ paths:
           description: Nutzer erfolgreich gelöscht
         '404':
           description: Nutzer nicht gefunden
+        '401':
+          description: Fehlender oder ungültiger API-Key
+        '500':
+          description: Interner Serverfehler, z. B. durch einen Datenbankfehler
 
 components:
   securitySchemes:
