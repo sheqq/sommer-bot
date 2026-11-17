@@ -4,7 +4,7 @@ const { Client, IntentsBitField } = require('discord.js');
 const eventHandler = require('./handlers/eventHandler');
 const interactionHandler = require('./handlers/interactionHandler');
 
-const token = process.env.TOKEN?.trim();
+const token = process.env.BOT_TOKEN?.trim();
 
 if (!token) {
     console.error('Fehler: `TOKEN` fehlt in der `.env`. Bitte einen gültigen Discord Bot Token eintragen.');
