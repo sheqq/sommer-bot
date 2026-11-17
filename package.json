@@ -7,15 +7,13 @@
   "type": "commonjs",
   "main": "src/index.js",
   "scripts": {
-    "prestart": "npm run gen:api && npm run build:api",
+    "prestart": "npm run generate:api",
     "start": "node src/index.js",
     "generate:api": "openapi-generator-cli generate --input-spec src/api/sommer-facade.yaml --generator-name javascript --output src/api/generated --additional-properties=usePromises=true,projectName=sommer-api-client && esbuild src/api/generated/src/index.js --bundle --platform=node --format=cjs --outfile=src/api/generated/client.cjs",
     "prebuild": "npm run generate:api && redocly build-docs src/api/sommer-facade.yaml --output docs/api.html",
     "build": "npm run check",
     "pretest": "npm run generate:api",
     "check": "node scripts/check.js",
-    "gen:api": "npm install --no-save @openapitools/openapi-generator-cli@2.42.2 && node ./node_modules/@openapitools/openapi-generator-cli/main.js generate -i src/api/sommer-facade.yaml -g javascript -o src/api/generated/sommer --additional-properties=supportsES6=true,usePromises=true,withSeparateModelsAndApi=true,apiPackage=services,modelPackage=models,modelPropertyNaming=original --global-property=apiTests=false,modelTests=false,apiDocs=false,modelDocs=false",
-    "build:api": "babel src/api/generated/sommer/src --out-dir src/api/generated/sommer/dist --no-babelrc --presets @babel/preset-env",
     "test": "npm run check && node scripts/test-jsonService.js && node scripts/test-apiClient.js"
   },
   "engines": {
