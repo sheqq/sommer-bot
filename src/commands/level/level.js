@@ -17,8 +17,8 @@ module.exports = {
 
     callback: async (_client, interaction) => {
         const targetUser = interaction.options.getUser('nutzer') || interaction.user;
-        const pairs = levelService.getAllUserEntries();
-        const entry = pairs.find((pair) => pair.key === targetUser.id);
+        const levels = await levelService.getAllUserEntries(interaction.guildId);
+        const entry = levels.find((level) => level.userId === targetUser.id);
 
         if (!entry) {
             return interaction.reply({
@@ -27,7 +27,7 @@ module.exports = {
             });
         }
 
-        const { level, xp, nextLevelXp } = getXpProgress(entry.value);
+        const { level, xp, nextLevelXp } = getXpProgress(entry.xp);
         const progressText = `${xp}/${nextLevelXp} XP`;
 
         return interaction.reply({

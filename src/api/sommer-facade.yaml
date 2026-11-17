@@ -1,0 +1,162 @@
+openapi: 3.1.0
+info:
+  title: sommer-facade
+  description: REST API für sommer.vercel.app
+  version: 0.0.0
+
+servers:
+  - url: https://sommer-bot.vercel.app/api/v1
+
+security:
+  - ApiKeyAuth: []
+
+tags:
+  - name: level
+    description: Operationen rund um die Benutzerlevel
+
+paths:
+  /guild/{guildId}/level:
+    parameters:
+      - name: guildId
+        in: path
+        required: true
+        description: ID des Servers
+        schema:
+          type: string
+    get:
+      tags: [level]
+      operationId: getAllLevels
+      summary: Get all Levels
+      responses:
+        '200':
+          description: Liste aller Level
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Level'
+        '401':
+          description: Fehlender oder ungültiger API-Key
+        '500':
+          description: Interner Serverfehler, z. B. durch einen Datenbankfehler
+    post:
+      tags: [level]
+      operationId: createLevel
+      summary: Neues Level erstellen
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Level'
+      responses:
+        '201':
+          description: Level erfolgreich erstellt
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Level'
+        '400':
+          description: Ungültige Nutzerdaten, z. B. fehlende ID
+        '409':
+          description: Für diesen Nutzer existiert bereits ein Level in diesem Server
+        '401':
+          description: Fehlender oder ungültiger API-Key
+        '500':
+          description: Interner Serverfehler, z. B. durch einen Datenbankfehler
+
+  /guild/{guildId}/user/{userId}/level:
+    parameters:
+      - name: userId
+        in: path
+        required: true
+        description: ID des Nutzers
+        schema:
+          type: string
+      - name: guildId
+        in: path
+        required: true
+        description: ID des Servers
+        schema:
+          type: string
+    get:
+      tags: [level]
+      operationId: getUserById
+      summary: Level nach ID abrufen
+      responses:
+        '200':
+          description: Level gefunden
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Level'
+        '404':
+          description: Level nicht gefunden
+        '401':
+          description: Fehlender oder ungültiger API-Key
+        '500':
+          description: Interner Serverfehler
+    put:
+      tags: [level]
+      operationId: updateLevel
+      summary: Level anhand der Pfad-ID vollständig durch den Body ersetzen
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Level'
+      responses:
+        '200':
+          description: Level erfolgreich aktualisiert
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Level'
+        '404':
+          description: Level nicht gefunden
+        '401':
+          description: Fehlender oder ungültiger API-Key
+        '500':
+          description: Interner Serverfehler
+    delete:
+      tags: [level]
+      operationId: deleteLevel
+      summary: Level löschen
+      responses:
+        '204':
+          description: Level erfolgreich gelöscht
+        '404':
+          description: Level nicht gefunden
+        '401':
+          description: Fehlender oder ungültiger API-Key
+        '500':
+          description: Interner Serverfehler
+
+components:
+  securitySchemes:
+    ApiKeyAuth:
+      type: apiKey
+      in: header
+      name: X-API-Key
+  schemas:
+    Level:
+      type: object
+      required:
+        - guildId
+        - userId
+        - xp
+      properties:
+        guildId:
+          type: string
+          example: "2347247625478"
+        userId:
+          type: string
+          example: "Max"
+        xp:
+          type: integer
+          example: 100
+        level:
+          type: integer
+          example: 5

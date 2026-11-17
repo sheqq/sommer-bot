@@ -7,7 +7,7 @@ const interactionHandler = require('./handlers/interactionHandler');
 const token = process.env.BOT_TOKEN?.trim();
 
 if (!token) {
-    console.error('Fehler: `TOKEN` fehlt in der `.env`. Bitte einen gültigen Discord Bot Token eintragen.');
+    console.error('Fehler: `BOT_TOKEN` fehlt in der `.env`. Bitte einen gültigen Discord Bot Token eintragen.');
     process.exit(1);
 }
 

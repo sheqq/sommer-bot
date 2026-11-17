@@ -18,12 +18,12 @@ module.exports = async (_client, message) => {
     let updatedLevel;
 
     try {
-        const entry = levelService.getUserEntry(userId);
-        const currentXP = entry ? getXp(entry.value) : 0;
+        const entry = await levelService.getUserEntry(userId, message.guild.id);
+        const currentXP = entry ? getXp(entry.xp) : 0;
         updatedXP = currentXP + XP_PER_MESSAGE;
         oldLevel = getLevelFromXp(currentXP);
         updatedLevel = getLevelFromXp(updatedXP);
-        levelService.setUserXp(userId, updatedXP);
+        await levelService.setUserXp(userId, updatedXP, message.guild.id);
     } catch (error) {
         console.error(`Level-Daten für ${userId} konnten nicht verarbeitet werden:`, error.message);
         return;

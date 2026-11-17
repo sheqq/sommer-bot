@@ -3,3 +3,4 @@
 node_modules/
 data/
 src/api/generated/
+docs/api.html

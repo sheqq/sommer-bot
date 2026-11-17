@@ -21,20 +21,20 @@ module.exports = {
         await interaction.deferReply();
         
         const limit = interaction.options.getInteger('platz') || 10;
-        const pairs = levelService.getAllUserEntries();
+        const levels = await levelService.getAllUserEntries(interaction.guildId);
 
-        if (!pairs || pairs.length === 0) {
+        if (!levels || levels.length === 0) {
             return interaction.editReply({
                 content: 'Es wurden noch keine Level-Daten gefunden.',
             });
         }
 
-        const sorted = pairs
-            .filter(pair => getXp(pair.value) > 0)
+        const sorted = levels
+            .filter(level => getXp(level.xp) > 0)
             .sort((a, b) => {
-                const levelDiff = getLevelFromXp(b.value) - getLevelFromXp(a.value);
+                const levelDiff = getLevelFromXp(b.xp) - getLevelFromXp(a.xp);
                 if (levelDiff !== 0) return levelDiff;
-                return getXp(b.value) - getXp(a.value);
+                return getXp(b.xp) - getXp(a.xp);
             })
             .slice(0, limit);
 
@@ -48,10 +48,10 @@ module.exports = {
         let leaderboardText = `**📊 Level-Leaderboard (Top ${sorted.length})**\n\n`;
         
         for (let i = 0; i < sorted.length; i++) {
-            const pair = sorted[i];
-            const userId = pair.key;
-            const level = getLevelFromXp(pair.value);
-            const xp = getXp(pair.value);
+            const userLevel = sorted[i];
+            const userId = userLevel.userId;
+            const level = getLevelFromXp(userLevel.xp);
+            const xp = getXp(userLevel.xp);
 
             // Versuche, den Benutzernamen zu erhalten
             let userName = `<@${userId}>`;
