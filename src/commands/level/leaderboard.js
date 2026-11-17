@@ -1,5 +1,5 @@
 const { ApplicationCommandOptionType, PermissionFlagsBits } = require('discord.js');
-const levelService = require('../../services/jsonService.js');
+const levelService = require('../../services/levelService');
 const { getLevelFromXp, getXp } = require('../../utils/levels');
 
 module.exports = {
@@ -21,8 +21,7 @@ module.exports = {
         await interaction.deferReply();
         
         const limit = interaction.options.getInteger('platz') || 10;
-        const service = levelService();
-        const pairs = service.getFile('levels.json');
+        const pairs = levelService.getAllUserEntries();
 
         if (!pairs || pairs.length === 0) {
             return interaction.editReply({

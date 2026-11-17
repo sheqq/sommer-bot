@@ -2,6 +2,7 @@ const path = require('path');
 require('dotenv').config({ path: path.resolve(__dirname, '..', '.env') });
 const { Client, IntentsBitField } = require('discord.js');
 const eventHandler = require('./handlers/eventHandler');
+const interactionHandler = require('./handlers/interactionHandler');
 
 const token = process.env.TOKEN?.trim();
 
@@ -22,6 +23,7 @@ const client = new Client({
 });
 
 eventHandler(client);
+client.on('interactionCreate', (interaction) => interactionHandler(client, interaction));
 
 
 client.login(token).catch(error => {

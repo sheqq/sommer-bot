@@ -1,17 +1,17 @@
-const { cleanupColorRoleAfterMemberLeave } = require('../../utils/colorRoles');
-const jsonService = require('../../services/jsonService.js');
+const { cleanupColorRoleAfterMemberLeave } = require('../../services/roleService');
+const levelService = require('../../services/levelService');
 
 module.exports = async (_client, member) => {
     if (member.user.bot) return;
 
     try {
-        const service = jsonService();
-
-        // Farbrolle des Users entfernen
-        await cleanupColorRoleAfterMemberLeave(member);
+        const { warnings } = await cleanupColorRoleAfterMemberLeave(member);
+        for (const warning of warnings) {
+            console.error(`Farbrolle für ${member.user.tag}:`, warning.message);
+        }
 
         // Level des Users entfernen
-        const removed = service.removeEntry('levels.json', member.user.id);
+        const removed = levelService.removeUser(member.user.id);
         if (removed) {
             console.log(`Level-Daten entfernt für Member ${member.user.tag}`);
         }

@@ -1,7 +1,7 @@
-const { devId, guildId } = require("../../../config.json");
-const getLocalCommands = require("../../utils/getLocalCommands");
+const { devId, guildId } = require('../../config.json');
+const getLocalCommands = require('../utils/getLocalCommands');
 
-module.exports = async (client, interaction) => {
+async function interactionHandler(client, interaction) {
     if (!interaction.isChatInputCommand()) return;
     const localCommands = getLocalCommands();
 
@@ -43,9 +43,22 @@ module.exports = async (client, interaction) => {
         }
 
         await commandObject.callback(client, interaction);
-
     } catch (error) {
         console.error(`Fehler beim Ausführen von Command ${interaction.commandName}:`, error);
-    }
 
-};
+        const errorMessage = `Fehler beim Ausführen des Commands: ${error?.message || 'Unbekannter Fehler'}`;
+        try {
+            if (interaction.deferred) {
+                await interaction.editReply({ content: errorMessage });
+            } else if (interaction.replied) {
+                await interaction.followUp({ content: errorMessage, ephemeral: true });
+            } else {
+                await interaction.reply({ content: errorMessage, ephemeral: true });
+            }
+        } catch (replyError) {
+            console.error('Fehlermeldung konnte nicht an Discord gesendet werden:', replyError);
+        }
+    }
+}
+
+module.exports = interactionHandler;

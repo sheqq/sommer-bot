@@ -1,5 +1,5 @@
 const { ApplicationCommandOptionType, PermissionFlagsBits } = require('discord.js');
-const levelService = require('../../services/jsonService.js');
+const levelService = require('../../services/levelService');
 const { getXpProgress } = require('../../utils/levels');
 
 module.exports = {
@@ -17,8 +17,7 @@ module.exports = {
 
     callback: async (_client, interaction) => {
         const targetUser = interaction.options.getUser('nutzer') || interaction.user;
-        const service = levelService();
-        const pairs = service.getFile('levels.json');
+        const pairs = levelService.getAllUserEntries();
         const entry = pairs.find((pair) => pair.key === targetUser.id);
 
         if (!entry) {

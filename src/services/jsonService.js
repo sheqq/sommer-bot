@@ -1,104 +1,79 @@
 const fs = require('fs');
 const path = require('path');
 
-// get add und remove hier implementieren
-module.exports = () => {
-    const resolveFilePath = (filename) => path.join(__dirname, '..', '..', 'data', filename);
+module.exports = (dataDirectory = path.join(__dirname, '..', '..', 'data')) => {
+    const resolveFilePath = (filename) => path.join(dataDirectory, filename);
     const ensureParentDirectory = (filePath) => {
         fs.mkdirSync(path.dirname(filePath), { recursive: true });
     };
 
-    function migrateEntries(filename, entries) {
-        if (filename === 'colorRoles.json') {
-            const migrated = entries
-                .map((entry) => {
-                    const amount = Number(
-                        typeof entry.value === 'object' ? entry.value?.amount : entry.value
-                    ) || 0;
-
-                    return amount > 0
-                        ? { ...entry, value: String(amount) }
-                        : null;
-                })
-                .filter(Boolean);
-
-            return {
-                entries: migrated,
-                changed: JSON.stringify(migrated) !== JSON.stringify(entries),
-            };
+    function validateEntries(entries, filename) {
+        if (!Array.isArray(entries)) {
+            throw new TypeError(`JSON-Datei "${filename}" muss ein Array enthalten.`);
         }
 
-        if (filename === 'levels.json') {
-            const migrated = entries.map((entry) => {
-                if (typeof entry.value !== 'object' || entry.value === null) {
-                    return entry;
-                }
+        entries.forEach((entry, index) => {
+            if (
+                !entry ||
+                typeof entry !== 'object' ||
+                Array.isArray(entry) ||
+                typeof entry.key !== 'string' ||
+                !Object.prototype.hasOwnProperty.call(entry, 'value') ||
+                entry.value === undefined
+            ) {
+                throw new TypeError(
+                    `Ungültiger Eintrag an Position ${index} in JSON-Datei "${filename}".`
+                );
+            }
+        });
 
-                const level = Math.max(Number(entry.value.level) || 1, 1);
-                const currentXp = Math.max(Number(entry.value.xp) || 0, 0);
-                const completedLevelXp = 100 * ((level - 1) * level / 2);
-
-                return {
-                    ...entry,
-                    value: String(completedLevelXp + currentXp),
-                };
-            });
-
-            return {
-                entries: migrated,
-                changed: JSON.stringify(migrated) !== JSON.stringify(entries),
-            };
-        }
-
-        return { entries, changed: false };
+        return entries;
     }
 
     function getFile(filename) {
         const filePath = resolveFilePath(filename);
 
-        if (fs.existsSync(filePath)) {
-            const content = fs.readFileSync(filePath, 'utf8');
-
-            if (!content.trim()) {
-                return [];
-            }
-
-            try {
-                const parsed = JSON.parse(content);
-                if (!Array.isArray(parsed)) {
-                    return [];
-                }
-
-                const migration = migrateEntries(filename, parsed);
-                if (migration.changed) {
-                    writeFile(migration.entries, filename);
-                    console.log(`JSON-Daten migriert: ${filename}`);
-                }
-
-                return migration.entries;
-            } catch {
-                return [];
-            }
+        if (!fs.existsSync(filePath)) {
+            writeFile([], filename);
+            return [];
         }
 
+        let content;
         try {
-            ensureParentDirectory(filePath);
-            fs.writeFileSync(filePath, JSON.stringify([], null, 2), 'utf8');
+            content = fs.readFileSync(filePath, 'utf8');
         } catch (error) {
-            console.error(`Konnte JSON-Datei nicht anlegen: ${filePath}`, error);
+            throw new Error(`Konnte JSON-Datei "${filename}" nicht lesen: ${error.message}`, {
+                cause: error,
+            });
         }
 
-        return [];
+        if (!content.trim()) {
+            throw new SyntaxError(`JSON-Datei "${filename}" ist leer; erwartet wurde ein JSON-Array.`);
+        }
+
+        let parsed;
+        try {
+            parsed = JSON.parse(content);
+        } catch (error) {
+            throw new SyntaxError(`Ungültiges JSON in "${filename}": ${error.message}`, {
+                cause: error,
+            });
+        }
+
+        return validateEntries(parsed, filename);
     }
 
     function writeFile(content, filename) {
         const filePath = resolveFilePath(filename);
+        validateEntries(content, filename);
 
         try {
             ensureParentDirectory(filePath);
             fs.writeFileSync(filePath, JSON.stringify(content, null, 2), 'utf8');
         } catch (error) {
-            console.error(`Konnte JSON-Datei nicht schreiben: ${filePath}`, error);
+            throw new Error(`Konnte JSON-Datei "${filename}" nicht schreiben: ${error.message}`, {
+                cause: error,
+            });
         }
     }
 
@@ -108,6 +83,10 @@ module.exports = () => {
     }
 
     function addEntry(filename, key, value) {
+        if (typeof key !== 'string' || !key || value === undefined) {
+            throw new TypeError(`Ungültiger Schlüssel oder Wert für JSON-Datei "${filename}".`);
+        }
+
         const entries = getFile(filename);
         const index = entries.findIndex((entry) => entry.key === key);
 
@@ -122,6 +101,10 @@ module.exports = () => {
     }
 
     function removeEntry(filename, key) {
+        if (typeof key !== 'string' || !key) {
+            throw new TypeError(`Ungültiger Schlüssel für JSON-Datei "${filename}".`);
+        }
+
         const entries = getFile(filename);
         const index = entries.findIndex((entry) => entry.key === key);
 

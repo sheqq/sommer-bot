@@ -1,4 +1,4 @@
-const levelService = require("../../services/jsonService.js");
+const levelService = require('../../services/levelService');
 const { getLevelFromXp, getXp } = require('../../utils/levels');
 
 const LEVEL_SYSTEM_ENABLED = true;
@@ -12,22 +12,26 @@ module.exports = async (_client, message) => {
 
     if (!LEVEL_SYSTEM_ENABLED) return;
 
-    const service = levelService();
-    const fileName = 'levels.json';
     const userId = message.author.id;
+    let updatedXP;
+    let oldLevel;
+    let updatedLevel;
 
-    let entry = service.getEntry(fileName, userId);
-
-    const currentXP = entry ? getXp(entry.value) : 0;
-    const updatedXP = currentXP + XP_PER_MESSAGE;
-    const oldLevel = getLevelFromXp(currentXP);
-    const updatedLevel = getLevelFromXp(updatedXP);
+    try {
+        const entry = levelService.getUserEntry(userId);
+        const currentXP = entry ? getXp(entry.value) : 0;
+        updatedXP = currentXP + XP_PER_MESSAGE;
+        oldLevel = getLevelFromXp(currentXP);
+        updatedLevel = getLevelFromXp(updatedXP);
+        levelService.setUserXp(userId, updatedXP);
+    } catch (error) {
+        console.error(`Level-Daten für ${userId} konnten nicht verarbeitet werden:`, error.message);
+        return;
+    }
 
     if (updatedLevel > oldLevel) {
         await message.channel.send(`${message.author.tag}, du bist jetzt Level ${updatedLevel}!`);
     }
-
-    service.addEntry(fileName, userId, String(updatedXP));
 
     console.log(`${message.author.tag}, du hast jetzt ${updatedXP} XP und bist Level ${updatedLevel}!`);
 };

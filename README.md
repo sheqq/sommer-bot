@@ -5,9 +5,7 @@ Discord-Bot für den Sommer-Server.
 ## Voraussetzungen
 
 - Node.js 22 oder neuer
-- Java im `PATH` (für den OpenAPI-Generator beim Start)
 - Eine Discord-Bot-App mit Token
-- Optional: ein Backend für `src/services/userService.js`
 
 ## Einrichtung
 
@@ -17,14 +15,10 @@ Discord-Bot für den Sommer-Server.
 npm install
 ```
 
-Der API-Client wird bei jedem `npm start` aus `src/api/sommer-facade.yaml` generiert und für Node.js kompiliert.
-
-2. `.env.example` nach `.env` kopieren und ausfüllen:
+2. `.env.example` nach `.env` kopieren und den Discord-Token eintragen:
 
 ```env
 TOKEN=dein_discord_bot_token
-API_BASE_URL=http://localhost:8080/api/v1
-API_KEY=dein_api_key
 ```
 
 3. `config.json` prüfen:
@@ -32,10 +26,12 @@ API_KEY=dein_api_key
 ```json
 {
   "guildId": "...",
-  "clientId": "...",
   "devId": "..."
 }
 ```
+
+`guildId` wird für die Slash-Command-Registrierung und den Farbrollen-Abgleich benötigt.
+`devId` beschränkt Entwickler-Commands. Eine `clientId` wird vom Bot nicht verwendet.
 
 ## Start
 
@@ -49,12 +45,6 @@ npm start
 npm run check
 ```
 
-## API-Client generieren
-
-```powershell
-npm run gen:api
-```
-
 ## Projektstruktur
 
 - `src/index.js` – Einstiegspunkt
@@ -62,5 +52,5 @@ npm run gen:api
 - `src/events/` – Bot-Events
 - `src/commands/` – Slash-Commands
 - `src/utils/` – Hilfsfunktionen
-- `src/services/` – Dateispeicher und API-Zugriff
+- `src/services/` – Dateispeicher
 

@@ -7,23 +7,15 @@
   "type": "commonjs",
   "main": "src/index.js",
   "scripts": {
-    "prestart": "npm run gen:api && npm run build:api",
     "start": "node src/index.js",
     "check": "node scripts/check.js",
-    "test": "npm run check",
-    "gen:api": "npm install --no-save @openapitools/openapi-generator-cli@2.42.2 && node ./node_modules/@openapitools/openapi-generator-cli/main.js generate -i src/api/sommer-facade.yaml -g javascript -o src/api/generated/sommer --additional-properties=supportsES6=true,usePromises=true,withSeparateModelsAndApi=true,apiPackage=services,modelPackage=models,modelPropertyNaming=original --global-property=apiTests=false,modelTests=false,apiDocs=false,modelDocs=false",
-    "build:api": "babel src/api/generated/sommer/src --out-dir src/api/generated/sommer/dist --no-babelrc --presets @babel/preset-env"
+    "test": "npm run check && node scripts/test-jsonService.js"
   },
   "engines": {
     "node": ">=22.13.1"
   },
   "dependencies": {
-    "@babel/cli": "^7.29.7",
-    "@babel/core": "^7.29.13",
-    "@babel/preset-env": "^7.29.14",
-    "@openapitools/openapi-generator-cli": "^2.42.2",
     "discord.js": "^14.27.0",
-    "dotenv": "^18.0.7",
-    "superagent": "^10.4.2"
+    "dotenv": "^18.0.7"
   }
 }
