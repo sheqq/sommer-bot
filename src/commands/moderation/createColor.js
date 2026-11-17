@@ -1,5 +1,5 @@
 const { PermissionFlagsBits } = require('discord.js');
-const { assignColorToMember, createRandomColor } = require('../../utils/colorRoles.js');
+const { assignColorToMember, createRandomColor } = require('../../services/roleService');
 
 module.exports = {
     name: 'create',
@@ -20,14 +20,22 @@ module.exports = {
     ],
     permissionsRequired: [PermissionFlagsBits.Administrator],
 
-    callback: async (client, interaction) => {
-
+    callback: async (_client, interaction) => {
         const user = interaction.options.getUser('nutzer') || interaction.user;
         const guildMember = await interaction.guild.members.fetch(user.id);
 
         const color = interaction.options.getString('farbe') || createRandomColor();
-        const role = await assignColorToMember(guildMember, color);
+        const { role, warnings } = await assignColorToMember(guildMember, color);
 
-        interaction.reply({ content: `Die Rolle **${role.name}** wurde erstellt/gewählt und ${user} zugewiesen.` });
+        for (const warning of warnings) {
+            console.error(`Farbrolle für ${user.tag}:`, warning.message);
+        }
+
+        const warningText = warnings.length
+            ? '\nDie bisherige Farbrolle konnte nicht vollständig gelöscht werden. Details stehen im Bot-Log.'
+            : '';
+        await interaction.reply({
+            content: `Die Rolle **${role.name}** wurde erstellt/gewählt und ${user} zugewiesen.${warningText}`,
+        });
     },
 };
