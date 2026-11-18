@@ -1,21 +1,20 @@
-const { guildId } = require('../../config.json');
 const { apiClient } = require('../api/client');
 
 module.exports = {
-    getUserEntry(userId, targetGuildId = guildId) {
-        return apiClient.getUserLevel(targetGuildId, userId);
+    getUserEntry(userId, guildId) {
+        return apiClient.getUserLevel(guildId, userId);
     },
 
-    getAllUserEntries(targetGuildId = guildId) {
-        return apiClient.getAllLevels(targetGuildId);
+    getAllUserEntries(guildId) {
+        return apiClient.getAllLevels(guildId);
     },
 
-    async setUserXp(userId, xp, targetGuildId = guildId) {
-        const level = { guildId: targetGuildId, userId, xp };
-        const existing = await apiClient.getUserLevel(targetGuildId, userId);
+    async setUserXp(userId, xp, guildId) {
+        const level = { guildId, userId, xp };
+        const existing = await apiClient.getUserLevel(guildId, userId);
 
         if (existing) {
-            return apiClient.updateLevel(targetGuildId, userId, level);
+            return apiClient.updateLevel(guildId, userId, level);
         }
 
         try {
@@ -25,11 +24,11 @@ module.exports = {
                 throw error;
             }
 
-            return apiClient.updateLevel(targetGuildId, userId, level);
+            return apiClient.updateLevel(guildId, userId, level);
         }
     },
 
-    removeUser(userId, targetGuildId = guildId) {
-        return apiClient.deleteLevel(targetGuildId, userId);
+    removeUser(userId, guildId) {
+        return apiClient.deleteLevel(guildId, userId);
     },
 };

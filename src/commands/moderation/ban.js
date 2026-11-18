@@ -5,7 +5,6 @@ const levelService = require('../../services/levelService');
 module.exports = {
     name: 'ban',
     description: 'Einen Nutzer bannen',
-    devOnly: true,
     options: [
         {
             name: 'nutzer',
@@ -39,7 +38,7 @@ module.exports = {
         for (const warning of warnings) {
             console.error(`Farbrolle für ${user.tag}:`, warning.message);
         }
-        levelService.removeUser(user.id);
+        await levelService.removeUser(user.id, interaction.guildId);
         await member.ban({ reason });
         await interaction.reply({ content: `Nutzer **${user.tag}** wurde gebannt. Grund: ${reason}` });
     },

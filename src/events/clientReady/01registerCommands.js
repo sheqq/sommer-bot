@@ -1,4 +1,3 @@
-const { guildId } = require('../../../config.json');
 const getLocalCommands = require('../../utils/getLocalCommands.js');
 const getApplicationCommands = require('../../utils/getApplicationCommands.js');
 const areCommandsDifferent = require('../../utils/areCommandsDifferent.js');
@@ -6,7 +5,7 @@ const areCommandsDifferent = require('../../utils/areCommandsDifferent.js');
 module.exports = async (client) => {
     try {
         const localCommands = getLocalCommands();
-        const applicationCommands = await getApplicationCommands(client, guildId);
+        const applicationCommands = await getApplicationCommands(client);
 
         for (const localCommand of localCommands) {
             const { name, description, options = [] } = localCommand;

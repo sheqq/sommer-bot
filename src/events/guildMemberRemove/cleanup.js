@@ -11,10 +11,8 @@ module.exports = async (_client, member) => {
         }
 
         // Level des Users entfernen
-        const removed = levelService.removeUser(member.user.id);
-        if (removed) {
-            console.log(`Level-Daten entfernt für Member ${member.user.tag}`);
-        }
+        await levelService.removeUser(member.user.id, member.guild.id);
+        console.log(`Level-Daten entfernt für Member ${member.user.tag}`);
     } catch (error) {
         console.error('Fehler beim Entfernen der Daten für Member:', error?.message || error);
     }

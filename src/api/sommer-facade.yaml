@@ -1,7 +1,7 @@
 openapi: 3.1.0
 info:
   title: sommer-facade
-  description: REST API für sommer.vercel.app
+  description: REST API für sommer-bot.vercel.app
   version: 0.0.0
 
 servers:
