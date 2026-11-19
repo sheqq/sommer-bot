@@ -1,5 +1,6 @@
 const { PermissionFlagsBits } = require('discord.js');
 const { assignColorToMember, createRandomColor } = require('../../services/roleService');
+const guildService = require('../../services/guildService');
 
 module.exports = {
     name: 'create',
@@ -21,6 +22,13 @@ module.exports = {
     permissionsRequired: [PermissionFlagsBits.Administrator],
 
     callback: async (_client, interaction) => {
+        if (!await guildService.areColorsEnabled(interaction.guildId)) {
+            return interaction.reply({
+                content: 'Farbrollen sind auf diesem Server deaktiviert.',
+                ephemeral: true,
+            });
+        }
+
         const user = interaction.options.getUser('nutzer') || interaction.user;
         const guildMember = await interaction.guild.members.fetch(user.id);
 

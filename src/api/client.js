@@ -1,4 +1,4 @@
-const { ApiClient, Level, LevelApi } = require('./generated/client.cjs');
+const { ApiClient, Guild, GuildApi, Level, LevelApi } = require('./generated/client.cjs');
 
 function createApiClient({
     baseUrl = process.env.API_URL,
@@ -13,9 +13,27 @@ function createApiClient({
 
     const apiClient = new ApiClient(new URL('/api/v1', baseUrl).toString());
     apiClient.authentications.ApiKeyAuth.apiKey = apiToken;
+    const guildsApi = new GuildApi(apiClient);
     const levelsApi = new LevelApi(apiClient);
 
     return {
+        async getGuild(guildId) {
+            try {
+                return await guildsApi.getGuildById(guildId);
+            } catch (error) {
+                if (error?.status === 404) {
+                    return null;
+                }
+                throw error;
+            }
+        },
+
+        createGuild(guild) {
+            const model = new Guild(guild.guildId);
+            model.colorsEnabled = guild.colorsEnabled;
+            return guildsApi.createGuild(model);
+        },
+
         getAllLevels(guildId) {
             return levelsApi.getAllLevels(guildId);
         },
@@ -56,6 +74,12 @@ function getDefaultClient() {
 }
 
 const apiClient = {
+    getGuild(...args) {
+        return getDefaultClient().getGuild(...args);
+    },
+    createGuild(...args) {
+        return getDefaultClient().createGuild(...args);
+    },
     getAllLevels(...args) {
         return getDefaultClient().getAllLevels(...args);
     },

@@ -2,7 +2,7 @@ openapi: 3.1.0
 info:
   title: sommer-facade
   description: REST API für sommer-bot.vercel.app
-  version: 0.0.0
+  version: 0.0.1
 
 servers:
   - url: https://sommer-bot.vercel.app/api/v1
@@ -13,33 +13,83 @@ security:
 tags:
   - name: level
     description: Operationen rund um die Benutzerlevel
+  - name: guild
+    description: Operationen rund um die Server
 
 paths:
+  /guild:
+    post:
+      tags: [guild]
+      operationId: createGuild
+      summary: Server speichern
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Guild'
+      responses:
+        '201':
+          $ref: '#/components/responses/GuildSuccess'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '409':
+          $ref: '#/components/responses/Conflict'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+  /guild/{guildId}:
+    parameters:
+      - $ref: '#/components/parameters/GuildId'
+    get:
+      tags: [guild]
+      operationId: getGuildById
+      summary: Server nach ID abrufen
+      responses:
+        '200':
+          $ref: '#/components/responses/GuildSuccess'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+    put:
+      tags: [guild]
+      operationId: updateGuild
+      summary: Guild anhand der Pfad-ID vollständig durch den Body ersetzen
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Guild'
+      responses:
+        '200':
+          $ref: '#/components/responses/GuildSuccess'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
   /guild/{guildId}/level:
     parameters:
-      - name: guildId
-        in: path
-        required: true
-        description: ID des Servers
-        schema:
-          type: string
+      - $ref: '#/components/parameters/GuildId'
     get:
       tags: [level]
       operationId: getAllLevels
       summary: Get all Levels
       responses:
         '200':
-          description: Liste aller Level
-          content:
-            application/json:
-              schema:
-                type: array
-                items:
-                  $ref: '#/components/schemas/Level'
+          $ref: '#/components/responses/LevelListSuccess'
         '401':
-          description: Fehlender oder ungültiger API-Key
+          $ref: '#/components/responses/Unauthorized'
         '500':
-          description: Interner Serverfehler, z. B. durch einen Datenbankfehler
+          $ref: '#/components/responses/InternalServerError'
     post:
       tags: [level]
       operationId: createLevel
@@ -52,51 +102,33 @@ paths:
               $ref: '#/components/schemas/Level'
       responses:
         '201':
-          description: Level erfolgreich erstellt
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/Level'
+          $ref: '#/components/responses/LevelSuccess'
         '400':
-          description: Ungültige Nutzerdaten, z. B. fehlende ID
+          $ref: '#/components/responses/BadRequest'
         '409':
-          description: Für diesen Nutzer existiert bereits ein Level in diesem Server
+          $ref: '#/components/responses/Conflict'
         '401':
-          description: Fehlender oder ungültiger API-Key
+          $ref: '#/components/responses/Unauthorized'
         '500':
-          description: Interner Serverfehler, z. B. durch einen Datenbankfehler
+          $ref: '#/components/responses/InternalServerError'
 
   /guild/{guildId}/user/{userId}/level:
     parameters:
-      - name: userId
-        in: path
-        required: true
-        description: ID des Nutzers
-        schema:
-          type: string
-      - name: guildId
-        in: path
-        required: true
-        description: ID des Servers
-        schema:
-          type: string
+      - $ref: '#/components/parameters/UserId'
+      - $ref: '#/components/parameters/GuildId'
     get:
       tags: [level]
       operationId: getUserById
       summary: Level nach ID abrufen
       responses:
         '200':
-          description: Level gefunden
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/Level'
+          $ref: '#/components/responses/LevelSuccess'
         '404':
-          description: Level nicht gefunden
+          $ref: '#/components/responses/NotFound'
         '401':
-          description: Fehlender oder ungültiger API-Key
+          $ref: '#/components/responses/Unauthorized'
         '500':
-          description: Interner Serverfehler
+          $ref: '#/components/responses/InternalServerError'
     put:
       tags: [level]
       operationId: updateLevel
@@ -109,30 +141,26 @@ paths:
               $ref: '#/components/schemas/Level'
       responses:
         '200':
-          description: Level erfolgreich aktualisiert
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/Level'
+          $ref: '#/components/responses/LevelSuccess'
         '404':
-          description: Level nicht gefunden
+          $ref: '#/components/responses/NotFound'
         '401':
-          description: Fehlender oder ungültiger API-Key
+          $ref: '#/components/responses/Unauthorized'
         '500':
-          description: Interner Serverfehler
+          $ref: '#/components/responses/InternalServerError'
     delete:
       tags: [level]
       operationId: deleteLevel
       summary: Level löschen
       responses:
         '204':
-          description: Level erfolgreich gelöscht
+          $ref: '#/components/responses/NoContentSuccess'
         '404':
-          description: Level nicht gefunden
+          $ref: '#/components/responses/NotFound'
         '401':
-          description: Fehlender oder ungültiger API-Key
+          $ref: '#/components/responses/Unauthorized'
         '500':
-          description: Interner Serverfehler
+          $ref: '#/components/responses/InternalServerError'
 
 components:
   securitySchemes:
@@ -140,7 +168,70 @@ components:
       type: apiKey
       in: header
       name: X-API-Key
+  parameters:
+    GuildId:
+      name: guildId
+      in: path
+      required: true
+      description: ID des Servers
+      schema:
+        $ref: '#/components/schemas/GuildIdentifier'
+    UserId:
+      name: userId
+      in: path
+      required: true
+      description: ID des Nutzers
+      schema:
+        $ref: '#/components/schemas/UserIdentifier'
+  responses:
+    GuildSuccess:
+      description: Erfolgreiche Antwort mit Serverdaten
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Guild'
+    LevelListSuccess:
+      description: Erfolgreiche Antwort mit einer Liste von Leveln
+      content:
+        application/json:
+          schema:
+            type: array
+            items:
+              $ref: '#/components/schemas/Level'
+    LevelSuccess:
+      description: Erfolgreiche Antwort mit Leveldaten
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Level'
+    NoContentSuccess:
+      description: Anfrage erfolgreich abgeschlossen
+    BadRequest:
+      description: Ungültige Nutzerdaten, z. B. fehlende ID
+    Conflict:
+      description: Die Ressource existiert bereits
+    NotFound:
+      description: Angeforderte Ressource nicht gefunden
+    Unauthorized:
+      description: Fehlender oder ungültiger API-Key
+    InternalServerError:
+      description: Interner Serverfehler
   schemas:
+    ColorsEnabled:
+      type: boolean
+      example: true
+    GuildIdentifier:
+      type: string
+      example: "2347247625478"
+    UserIdentifier:
+      type: string
+      example: "Max"
+    XP:
+      type: integer
+      example: 100
+    LevelNumber:
+      type: integer
+      example: 5
     Level:
       type: object
       required:
@@ -149,14 +240,32 @@ components:
         - xp
       properties:
         guildId:
-          type: string
-          example: "2347247625478"
+          $ref: '#/components/schemas/GuildIdentifier'
         userId:
-          type: string
-          example: "Max"
+          $ref: '#/components/schemas/UserIdentifier'
         xp:
-          type: integer
-          example: 100
+          $ref: '#/components/schemas/XP'
         level:
-          type: integer
-          example: 5
+          $ref: '#/components/schemas/LevelNumber'
+    Guild:
+      type: object
+      required:
+        - guildId
+      properties:
+        guildId:
+          $ref: '#/components/schemas/GuildIdentifier'
+        colorsEnabled:
+          $ref: '#/components/schemas/ColorsEnabled'
+    User:
+        type: object
+        required:
+          - userId
+          - guildId
+        properties:
+          userId:
+            $ref: '#/components/schemas/UserIdentifier'
+          guildId:
+            type: array
+            items:
+              type: string
+            example: ["2347247625478", "2347247625479"]
