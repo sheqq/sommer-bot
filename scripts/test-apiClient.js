@@ -74,11 +74,20 @@ async function run() {
         assert(guild instanceof Guild);
         assert.strictEqual(guild.colorsEnabled, true);
         assert.strictEqual(await client.getGuild('missing'), null);
-        const newGuild = { guildId: 'guild', colorsEnabled: true };
+        const newGuild = {
+            guildId: 'guild',
+            name: 'Guild',
+            iconUrl: null,
+            colorsEnabled: true,
+        };
         assert((await client.createGuild(newGuild)) instanceof Guild);
         assert.strictEqual(calls[8].method, 'POST');
         assert.strictEqual(calls[8].url, '/api/v1/guild');
         assert.deepStrictEqual(calls[8].body, newGuild);
+        assert((await client.updateGuild('guild', { ...newGuild, name: 'Renamed' })) instanceof Guild);
+        assert.strictEqual(calls[9].method, 'PUT');
+        assert.strictEqual(calls[9].url, '/api/v1/guild/guild');
+        assert.strictEqual(calls[9].body.name, 'Renamed');
     } finally {
         server.close();
         await once(server, 'close');
@@ -87,6 +96,7 @@ async function run() {
     const originalMethods = {
         getGuild: defaultApiClient.getGuild,
         createGuild: defaultApiClient.createGuild,
+        updateGuild: defaultApiClient.updateGuild,
         getUserLevel: defaultApiClient.getUserLevel,
         createLevel: defaultApiClient.createLevel,
         updateLevel: defaultApiClient.updateLevel,
@@ -97,12 +107,17 @@ async function run() {
     let createConflict = false;
     let existingGuild = null;
     let createGuildConflict = false;
+    const updatedGuilds = [];
 
     defaultApiClient.getGuild = async () => existingGuild;
     defaultApiClient.createGuild = async (guild) => {
         if (createGuildConflict) {
             throw { status: 409 };
         }
+        return guild;
+    };
+    defaultApiClient.updateGuild = async (guildId, guild) => {
+        updatedGuilds.push({ guildId, guild });
         return guild;
     };
     defaultApiClient.getUserLevel = async () => existingLevel;
@@ -119,17 +134,34 @@ async function run() {
     };
 
     try {
-        assert.deepStrictEqual(await guildService.registerGuild('guild'), {
+        const guild = { id: 'guild', name: 'Guild', iconURL: () => null };
+        assert.deepStrictEqual(await guildService.registerGuild(guild), {
             guildId: 'guild',
+            name: 'Guild',
+            iconUrl: null,
             colorsEnabled: true,
         });
         existingGuild = { guildId: 'guild', colorsEnabled: false };
         createGuildConflict = true;
-        assert.deepStrictEqual(await guildService.registerGuild('guild'), existingGuild);
+        assert.deepStrictEqual(await guildService.registerGuild(guild), {
+            guildId: 'guild',
+            name: 'Guild',
+            iconUrl: null,
+            colorsEnabled: false,
+        });
+        assert.deepStrictEqual(updatedGuilds, [{
+            guildId: 'guild',
+            guild: {
+                guildId: 'guild',
+                name: 'Guild',
+                iconUrl: null,
+                colorsEnabled: false,
+            },
+        }]);
         assert.strictEqual(await guildService.areColorsEnabled('guild'), false);
 
         const registeredGuildIds = [];
-        guildService.registerGuild = async (guildId) => registeredGuildIds.push(guildId);
+        guildService.registerGuild = async (guild) => registeredGuildIds.push(guild.id);
         await registerGuilds({
             guilds: {
                 cache: new Map([['first', { id: 'first' }], ['second', { id: 'second' }]]),

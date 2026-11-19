@@ -3,7 +3,7 @@ const guildService = require('../../services/guildService');
 module.exports = async (client) => {
     for (const guild of client.guilds.cache.values()) {
         try {
-            await guildService.registerGuild(guild.id);
+            await guildService.registerGuild(guild);
         } catch (error) {
             console.error(`Server ${guild.id} konnte nicht in der API gespeichert werden:`, error?.message || error);
         }

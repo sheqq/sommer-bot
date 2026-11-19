@@ -1,19 +1,29 @@
 const { apiClient } = require('../api/client');
 
 module.exports = {
-    async registerGuild(guildId) {
+    async registerGuild(guild) {
+        const guildData = {
+            guildId: guild.id,
+            name: guild.name,
+            iconUrl: guild.iconURL(),
+        };
+
         try {
-            return await apiClient.createGuild({ guildId, colorsEnabled: true });
+            return await apiClient.createGuild({ ...guildData, colorsEnabled: true });
         } catch (error) {
             if (error?.status !== 409) {
                 throw error;
             }
 
-            const guild = await apiClient.getGuild(guildId);
-            if (!guild) {
-                throw new Error(`Server ${guildId} wurde nach einem Konflikt nicht gefunden.`);
+            const existingGuild = await apiClient.getGuild(guild.id);
+            if (!existingGuild) {
+                throw new Error(`Server ${guild.id} wurde nach einem Konflikt nicht gefunden.`);
             }
-            return guild;
+
+            return apiClient.updateGuild(guild.id, {
+                ...guildData,
+                colorsEnabled: existingGuild.colorsEnabled === true,
+            });
         }
     },
 

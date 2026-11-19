@@ -30,8 +30,18 @@ function createApiClient({
 
         createGuild(guild) {
             const model = new Guild(guild.guildId);
+            model.name = guild.name;
+            model.iconUrl = guild.iconUrl;
             model.colorsEnabled = guild.colorsEnabled;
             return guildsApi.createGuild(model);
+        },
+
+        updateGuild(guildId, guild) {
+            const model = new Guild(guild.guildId);
+            model.name = guild.name;
+            model.iconUrl = guild.iconUrl;
+            model.colorsEnabled = guild.colorsEnabled;
+            return guildsApi.updateGuild(guildId, model);
         },
 
         getAllLevels(guildId) {
@@ -79,6 +89,9 @@ const apiClient = {
     },
     createGuild(...args) {
         return getDefaultClient().createGuild(...args);
+    },
+    updateGuild(...args) {
+        return getDefaultClient().updateGuild(...args);
     },
     getAllLevels(...args) {
         return getDefaultClient().getAllLevels(...args);
