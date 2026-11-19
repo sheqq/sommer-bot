@@ -159,6 +159,21 @@ async function run() {
             },
         }]);
         assert.strictEqual(await guildService.areColorsEnabled('guild'), false);
+        const discordGuild = {
+            id: 'guild',
+            name: 'Updated name',
+            iconURL: () => 'https://example.com/icon.png',
+        };
+        await guildService.setColorsEnabled(discordGuild, true);
+        assert.deepStrictEqual(updatedGuilds[1], {
+            guildId: 'guild',
+            guild: {
+                guildId: 'guild',
+                name: 'Updated name',
+                iconUrl: 'https://example.com/icon.png',
+                colorsEnabled: true,
+            },
+        });
 
         const registeredGuildIds = [];
         guildService.registerGuild = async (guild) => registeredGuildIds.push(guild.id);

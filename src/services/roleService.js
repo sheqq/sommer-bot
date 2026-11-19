@@ -173,6 +173,55 @@ async function cleanupColorRoleAfterMemberLeave(member) {
     return { results, warnings };
 }
 
+async function deleteAllColorRoles(guild) {
+    await guild.roles.fetch();
+    const colorRoles = [...guild.roles.cache.values()].filter(isColorRole);
+    const failures = [];
+
+    for (const role of colorRoles) {
+        try {
+            await deleteColorRole(role, 'Farbrollen auf diesem Server deaktiviert');
+        } catch (error) {
+            failures.push(error);
+        }
+    }
+
+    if (failures.length > 0) {
+        throw new Error(
+            `${failures.length} von ${colorRoles.length} Farbrollen konnten nicht gelöscht werden: ` +
+            failures.map((error) => error.message).join(' | ')
+        );
+    }
+
+    return colorRoles.length;
+}
+
+async function assignColorRolesToAllMembers(guild) {
+    const members = await guild.members.fetch();
+    const failures = [];
+    const warnings = [];
+    let assigned = 0;
+    let eligible = 0;
+
+    for (const member of members.values()) {
+        if (member.user.bot) continue;
+        eligible += 1;
+
+        try {
+            const result = await assignColorToMember(member, createRandomColor());
+            assigned += 1;
+            warnings.push(...result.warnings.map((error) => ({
+                member,
+                error,
+            })));
+        } catch (error) {
+            failures.push({ member, error });
+        }
+    }
+
+    return { assigned, eligible, failures, warnings };
+}
+
 module.exports = {
     createRandomColor,
     createColorRole,
@@ -180,4 +229,6 @@ module.exports = {
     assignColorToMember,
     unassignColorFromMember,
     cleanupColorRoleAfterMemberLeave,
+    deleteAllColorRoles,
+    assignColorRolesToAllMembers,
 };

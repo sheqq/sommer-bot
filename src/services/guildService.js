@@ -31,4 +31,18 @@ module.exports = {
         const guild = await apiClient.getGuild(guildId);
         return guild?.colorsEnabled === true;
     },
+
+    async setColorsEnabled(guild, colorsEnabled) {
+        const existingGuild = await apiClient.getGuild(guild.id);
+        if (!existingGuild) {
+            throw new Error(`Server ${guild.id} ist nicht in der API gespeichert.`);
+        }
+
+        return apiClient.updateGuild(guild.id, {
+            guildId: guild.id,
+            name: guild.name,
+            iconUrl: guild.iconURL(),
+            colorsEnabled,
+        });
+    },
 };
