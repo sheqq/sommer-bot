@@ -1,4 +1,5 @@
 const getLocalCommands = require('../utils/getLocalCommands');
+const { MessageFlags } = require('discord.js');
 
 async function interactionHandler(client, interaction) {
     if (!interaction.isChatInputCommand()) return;
@@ -22,7 +23,7 @@ async function interactionHandler(client, interaction) {
             if (missingPermissions.length > 0) {
                 return interaction.reply({
                     content: `Du brauchst diese Berechtigungen für **${commandObject.name}**: ${commandObject.permissionsRequired.join(', ')}`,
-                    ephemeral: true,
+                    flags: MessageFlags.Ephemeral,
                 });
             }
         }
@@ -36,9 +37,9 @@ async function interactionHandler(client, interaction) {
             if (interaction.deferred) {
                 await interaction.editReply({ content: errorMessage });
             } else if (interaction.replied) {
-                await interaction.followUp({ content: errorMessage, ephemeral: true });
+                await interaction.followUp({ content: errorMessage, flags: MessageFlags.Ephemeral });
             } else {
-                await interaction.reply({ content: errorMessage, ephemeral: true });
+                await interaction.reply({ content: errorMessage, flags: MessageFlags.Ephemeral });
             }
         } catch (replyError) {
             console.error('Fehlermeldung konnte nicht an Discord gesendet werden:', replyError);

@@ -1,4 +1,4 @@
-const { ApplicationCommandOptionType, PermissionFlagsBits } = require('discord.js');
+const { ApplicationCommandOptionType, MessageFlags, PermissionFlagsBits } = require('discord.js');
 const { unassignColorFromMember } = require('../../services/roleService');
 const levelService = require('../../services/levelService');
 
@@ -26,12 +26,15 @@ module.exports = {
         const reason = interaction.options.getString('grund') || 'Kein Grund angegeben';
 
         if (!interaction.member.permissions.has(PermissionFlagsBits.BanMembers)) {
-            return interaction.reply({ content: 'Du hast keine Berechtigung zum Bannen.', ephemeral: true });
+            return interaction.reply({
+                content: 'Du hast keine Berechtigung zum Bannen.',
+                flags: MessageFlags.Ephemeral,
+            });
         }
 
         const member = await interaction.guild.members.fetch(user.id).catch(() => null);
         if (!member) {
-            return interaction.reply({ content: 'Nutzer nicht gefunden.', ephemeral: true });
+            return interaction.reply({ content: 'Nutzer nicht gefunden.', flags: MessageFlags.Ephemeral });
         }
 
         const { warnings } = await unassignColorFromMember(member);

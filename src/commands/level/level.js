@@ -1,4 +1,4 @@
-const { ApplicationCommandOptionType, PermissionFlagsBits } = require('discord.js');
+const { ApplicationCommandOptionType, MessageFlags, PermissionFlagsBits } = require('discord.js');
 const levelService = require('../../services/levelService');
 const { getXpProgress } = require('../../utils/levels');
 
@@ -23,7 +23,7 @@ module.exports = {
         if (!entry) {
             return interaction.reply({
                 content: `Für **${targetUser.tag}** wurden noch keine Level-Daten gefunden.`,
-                ephemeral: true,
+                flags: MessageFlags.Ephemeral,
             });
         }
 
@@ -32,7 +32,7 @@ module.exports = {
 
         return interaction.reply({
             content: `**${targetUser.tag}** ist aktuell **Level ${level}** mit **${progressText}**.`,
-            ephemeral: true,
+            flags: MessageFlags.Ephemeral,
         });
     },
 };

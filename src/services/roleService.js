@@ -76,7 +76,7 @@ async function createColorRole(guild, color) {
 
     return guild.roles.create({
         name: normalizedColor,
-        color: normalizedColor,
+        colors: { primaryColor: normalizedColor },
         position: highestBotRole.position,
         reason: 'Neue Farbrolle für neues Mitglied',
     });

@@ -1,4 +1,4 @@
-const { PermissionFlagsBits } = require('discord.js');
+const { MessageFlags, PermissionFlagsBits } = require('discord.js');
 const guildService = require('../../services/guildService');
 const {
     assignColorRolesToAllMembers,
@@ -23,7 +23,7 @@ module.exports = {
     permissionsRequired: [PermissionFlagsBits.Administrator],
 
     callback: async (_client, interaction) => {
-        await interaction.deferReply({ ephemeral: true });
+        await interaction.deferReply({ flags: MessageFlags.Ephemeral });
 
         if (interaction.options.getSubcommand() === 'deaktivieren') {
             await guildService.setColorsEnabled(interaction.guild, false);

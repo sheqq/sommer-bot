@@ -15,6 +15,7 @@ async function run() {
         createMember('user-2', false),
         createMember('bot-1', true),
     ];
+    const createOptions = [];
     const guild = {
         members: {
             me: botMember,
@@ -23,10 +24,11 @@ async function run() {
         roles: {
             cache: createCollection(),
             fetch: async () => {},
-            create: async ({ name }) => {
+            create: async (options) => {
+                createOptions.push(options);
                 const role = {
                     id: `role-${guild.roles.cache.size + 1}`,
-                    name,
+                    name: options.name,
                     guild,
                 };
                 guild.roles.cache.set(role.id, role);
@@ -43,6 +45,9 @@ async function run() {
     assert.strictEqual(assigned.eligible, 2);
     assert.strictEqual(assigned.failures.length, 0);
     assert.strictEqual(guild.roles.cache.size, 2);
+    assert(createOptions.every((options) =>
+        options.colors.primaryColor === options.name && !Object.hasOwn(options, 'color')
+    ));
     assert.strictEqual(members[0].roles.cache.size, 1);
     assert.strictEqual(members[1].roles.cache.size, 1);
     assert.strictEqual(members[2].roles.cache.size, 0);

@@ -1,4 +1,4 @@
-const { PermissionFlagsBits } = require('discord.js');
+const { MessageFlags, PermissionFlagsBits } = require('discord.js');
 const { assignColorToMember, createRandomColor } = require('../../services/roleService');
 const guildService = require('../../services/guildService');
 
@@ -25,7 +25,7 @@ module.exports = {
         if (!await guildService.areColorsEnabled(interaction.guildId)) {
             return interaction.reply({
                 content: 'Farbrollen sind auf diesem Server deaktiviert.',
-                ephemeral: true,
+                flags: MessageFlags.Ephemeral,
             });
         }
 
