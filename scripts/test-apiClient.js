@@ -34,6 +34,16 @@ async function run() {
                         colorsEnabled: true,
                         maxColorRoles: 75,
                         createAllowedRoleIds: ['allowed-role'],
+                        managementRoleIds: ['manager-role'],
+                        levelRoles: [{ level: 5, roleId: 'level-role' }],
+                        selfRolePanels: [{
+                            channelId: 'channel',
+                            messageId: 'message',
+                            roleIds: ['self-role'],
+                        }],
+                        welcomeChannelId: 'welcome-channel',
+                        welcomeMessage: 'Willkommen, {user}!',
+                        welcomeImageUrl: 'https://example.com/welcome.png',
                     })
                 );
             } else if (request.method === 'DELETE') {
@@ -80,6 +90,18 @@ async function run() {
         assert.strictEqual(guild.colorsEnabled, true);
         assert.strictEqual(guild.maxColorRoles, 75);
         assert.deepStrictEqual(guild.createAllowedRoleIds, ['allowed-role']);
+        assert.deepStrictEqual(guild.managementRoleIds, ['manager-role']);
+        assert.deepStrictEqual(JSON.parse(JSON.stringify(guild.levelRoles)), [
+            { level: 5, roleId: 'level-role' },
+        ]);
+        assert.deepStrictEqual(JSON.parse(JSON.stringify(guild.selfRolePanels)), [{
+            channelId: 'channel',
+            messageId: 'message',
+            roleIds: ['self-role'],
+        }]);
+        assert.strictEqual(guild.welcomeChannelId, 'welcome-channel');
+        assert.strictEqual(guild.welcomeMessage, 'Willkommen, {user}!');
+        assert.strictEqual(guild.welcomeImageUrl, 'https://example.com/welcome.png');
         assert.strictEqual(await client.getGuild('missing'), null);
         const newGuild = {
             guildId: 'guild',
@@ -88,6 +110,16 @@ async function run() {
             colorsEnabled: true,
             maxColorRoles: 100,
             createAllowedRoleIds: ['allowed-role'],
+            managementRoleIds: ['manager-role'],
+            levelRoles: [{ level: 5, roleId: 'level-role' }],
+            selfRolePanels: [{
+                channelId: 'channel',
+                messageId: 'message',
+                roleIds: ['self-role'],
+            }],
+            welcomeChannelId: 'welcome-channel',
+            welcomeMessage: 'Willkommen, {user}!',
+            welcomeImageUrl: 'https://example.com/welcome.png',
         };
         assert((await client.createGuild(newGuild)) instanceof Guild);
         assert.strictEqual(calls[8].method, 'POST');
@@ -151,12 +183,28 @@ async function run() {
             colorsEnabled: true,
             maxColorRoles: 100,
             createAllowedRoleIds: [],
+            managementRoleIds: [],
+            levelRoles: [],
+            selfRolePanels: [],
+            welcomeChannelId: null,
+            welcomeMessage: null,
+            welcomeImageUrl: null,
         });
         existingGuild = {
             guildId: 'guild',
             colorsEnabled: false,
             maxColorRoles: 42,
             createAllowedRoleIds: ['allowed-role'],
+            managementRoleIds: ['manager-role'],
+            levelRoles: [{ level: 5, roleId: 'level-role' }],
+            selfRolePanels: [{
+                channelId: 'channel',
+                messageId: 'message',
+                roleIds: ['self-role'],
+            }],
+            welcomeChannelId: 'welcome-channel',
+            welcomeMessage: 'Willkommen, {user}!',
+            welcomeImageUrl: 'https://example.com/welcome.png',
         };
         createGuildConflict = true;
         assert.deepStrictEqual(await guildService.registerGuild(guild), {
@@ -166,6 +214,16 @@ async function run() {
             colorsEnabled: false,
             maxColorRoles: 42,
             createAllowedRoleIds: ['allowed-role'],
+            managementRoleIds: ['manager-role'],
+            levelRoles: [{ level: 5, roleId: 'level-role' }],
+            selfRolePanels: [{
+                channelId: 'channel',
+                messageId: 'message',
+                roleIds: ['self-role'],
+            }],
+            welcomeChannelId: 'welcome-channel',
+            welcomeMessage: 'Willkommen, {user}!',
+            welcomeImageUrl: 'https://example.com/welcome.png',
         });
         assert.deepStrictEqual(updatedGuilds, [{
             guildId: 'guild',
@@ -176,6 +234,16 @@ async function run() {
                 colorsEnabled: false,
                 maxColorRoles: 42,
                 createAllowedRoleIds: ['allowed-role'],
+                managementRoleIds: ['manager-role'],
+                levelRoles: [{ level: 5, roleId: 'level-role' }],
+                selfRolePanels: [{
+                    channelId: 'channel',
+                    messageId: 'message',
+                    roleIds: ['self-role'],
+                }],
+                welcomeChannelId: 'welcome-channel',
+                welcomeMessage: 'Willkommen, {user}!',
+                welcomeImageUrl: 'https://example.com/welcome.png',
             },
         }]);
         assert.strictEqual(await guildService.areColorsEnabled('guild'), false);
@@ -194,6 +262,16 @@ async function run() {
                 colorsEnabled: true,
                 maxColorRoles: 42,
                 createAllowedRoleIds: ['allowed-role'],
+                managementRoleIds: ['manager-role'],
+                levelRoles: [{ level: 5, roleId: 'level-role' }],
+                selfRolePanels: [{
+                    channelId: 'channel',
+                    messageId: 'message',
+                    roleIds: ['self-role'],
+                }],
+                welcomeChannelId: 'welcome-channel',
+                welcomeMessage: 'Willkommen, {user}!',
+                welcomeImageUrl: 'https://example.com/welcome.png',
             },
         });
         await guildService.setMaxColorRoles(discordGuild, 50);
@@ -206,11 +284,55 @@ async function run() {
                 colorsEnabled: false,
                 maxColorRoles: 50,
                 createAllowedRoleIds: ['allowed-role'],
+                managementRoleIds: ['manager-role'],
+                levelRoles: [{ level: 5, roleId: 'level-role' }],
+                selfRolePanels: [{
+                    channelId: 'channel',
+                    messageId: 'message',
+                    roleIds: ['self-role'],
+                }],
+                welcomeChannelId: 'welcome-channel',
+                welcomeMessage: 'Willkommen, {user}!',
+                welcomeImageUrl: 'https://example.com/welcome.png',
             },
         });
         await guildService.setCreateAllowedRoleIds(discordGuild, ['role-1', 'role-1']);
         assert.deepStrictEqual(updatedGuilds[3].guild.createAllowedRoleIds, ['role-1']);
         assert.strictEqual(updatedGuilds[3].guild.maxColorRoles, 42);
+        await guildService.setManagementRoleIds(discordGuild, ['manager-1', 'manager-1']);
+        assert.deepStrictEqual(updatedGuilds[4].guild.managementRoleIds, ['manager-1']);
+        await guildService.setLevelRoles(discordGuild, [{ level: 10, roleId: 'reward-role' }]);
+        assert.deepStrictEqual(updatedGuilds[5].guild.levelRoles, [
+            { level: 10, roleId: 'reward-role' },
+        ]);
+        await guildService.setWelcomeSettings(
+            discordGuild,
+            'welcome-channel',
+            'Hallo {user}',
+            'https://example.com/welcome.png',
+        );
+        assert.strictEqual(updatedGuilds[6].guild.welcomeMessage, 'Hallo {user}');
+        assert.strictEqual(
+            updatedGuilds[6].guild.welcomeImageUrl,
+            'https://example.com/welcome.png',
+        );
+        await guildService.addSelfRolePanel(discordGuild, {
+            channelId: 'channel-2',
+            messageId: 'message-2',
+            roleIds: ['self-role-2'],
+        });
+        assert.deepStrictEqual(updatedGuilds[7].guild.selfRolePanels, [
+            {
+                channelId: 'channel',
+                messageId: 'message',
+                roleIds: ['self-role'],
+            },
+            {
+                channelId: 'channel-2',
+                messageId: 'message-2',
+                roleIds: ['self-role-2'],
+            },
+        ]);
         await assert.rejects(
             guildService.setMaxColorRoles(discordGuild, 251),
             RangeError,

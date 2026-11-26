@@ -1,4 +1,6 @@
 const levelService = require('../../services/levelService');
+const guildService = require('../../services/guildService');
+const { assignLevelRoles } = require('../../services/levelRoleService');
 const { getLevelFromXp, getXp } = require('../../utils/levels');
 
 const LEVEL_SYSTEM_ENABLED = true;
@@ -30,6 +32,16 @@ module.exports = async (_client, message) => {
     }
 
     if (updatedLevel > oldLevel) {
+        try {
+            const settings = await guildService.getGuild(message.guild.id);
+            await assignLevelRoles(
+                message.member,
+                updatedLevel,
+                settings?.levelRoles ?? [],
+            );
+        } catch (error) {
+            console.error(`Levelrollen für Server ${message.guild.id} konnten nicht geladen werden:`, error?.message || error);
+        }
         await message.channel.send(`${message.author.tag}, du bist jetzt Level ${updatedLevel}!`);
     }
 

@@ -1,5 +1,6 @@
 const assert = require('node:assert/strict');
 const removeGuildCommandDuplicates = require('../src/utils/removeGuildCommandDuplicates');
+const getLocalCommands = require('../src/utils/getLocalCommands');
 
 async function run() {
     const deletedIds = [];
@@ -36,6 +37,30 @@ async function run() {
     );
 
     assert.deepEqual(deletedIds, ['guild-response-time', 'guild-old-create']);
+
+    const commands = getLocalCommands();
+    for (const commandName of [
+        'levelrolle',
+        'selbstrollen-nachricht',
+        'willkommen',
+        'verwaltung-rechte',
+    ]) {
+        assert(commands.some((command) => command.name === commandName));
+    }
+
+    const selfRoleCommand = commands.find(
+        (command) => command.name === 'selbstrollen-nachricht',
+    );
+    assert(selfRoleCommand.options.length <= 25);
+    let optionalOptionSeen = false;
+    for (const option of selfRoleCommand.options) {
+        if (!option.required) {
+            optionalOptionSeen = true;
+        } else {
+            assert.strictEqual(optionalOptionSeen, false);
+        }
+    }
+
     console.log('OK: doppelte Guild-Commands werden entfernt, unabhängige bleiben erhalten.');
 }
 

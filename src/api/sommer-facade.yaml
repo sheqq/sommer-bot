@@ -2,7 +2,7 @@ openapi: 3.1.0
 info:
   title: sommer-facade
   description: REST API für sommer-bot.vercel.app
-  version: 0.0.3
+  version: 0.0.4
 
 servers:
   - url: https://sommer-bot.vercel.app/api/v1
@@ -279,6 +279,61 @@ components:
           items:
             type: string
           description: Discord-Rollen-IDs, die /farbrolle-erstellen ausführen dürfen
+        managementRoleIds:
+          type: array
+          uniqueItems: true
+          maxItems: 25
+          items:
+            type: string
+          description: Discord-Rollen-IDs, die Levelrollen, Selbstrollen-Nachrichten und Willkommen konfigurieren dürfen
+        levelRoles:
+          type: array
+          maxItems: 100
+          items:
+            type: object
+            required: [level, roleId]
+            properties:
+              level:
+                type: integer
+                minimum: 1
+                maximum: 1000
+              roleId:
+                type: string
+          description: Rollen, die beim Erreichen des jeweiligen Levels vergeben werden
+        selfRolePanels:
+          type: array
+          maxItems: 100
+          items:
+            type: object
+            required: [channelId, messageId, roleIds]
+            properties:
+              channelId:
+                type: string
+              messageId:
+                type: string
+              roleIds:
+                type: array
+                minItems: 1
+                maxItems: 20
+                uniqueItems: true
+                items:
+                  type: string
+        welcomeChannelId:
+          anyOf:
+            - type: string
+            - type: "null"
+        welcomeMessage:
+          anyOf:
+            - type: string
+              maxLength: 1800
+            - type: "null"
+        welcomeImageUrl:
+          description: HTTPS-Bild-URL für die Willkommensnachricht oder null
+          anyOf:
+            - type: string
+              format: uri
+              maxLength: 1000
+            - type: "null"
     User:
       type: object
       required:

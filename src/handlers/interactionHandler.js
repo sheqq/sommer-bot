@@ -1,11 +1,18 @@
 const getLocalCommands = require('../utils/getLocalCommands');
-const { MessageFlags } = require('discord.js');
+const { MessageFlags, PermissionFlagsBits } = require('discord.js');
+const guildService = require('../services/guildService');
+const selfRoleService = require('../services/selfRoleService');
+const SELF_ROLE_MENU_ID = require('../services/selfRoleService').customId;
 
 async function interactionHandler(client, interaction) {
-    if (!interaction.isChatInputCommand()) return;
-    const localCommands = getLocalCommands();
-
     try {
+        if (interaction.isStringSelectMenu() && interaction.customId === SELF_ROLE_MENU_ID) {
+            await selfRoleService.handleSelection(interaction);
+            return;
+        }
+
+        if (!interaction.isChatInputCommand()) return;
+        const localCommands = getLocalCommands();
         const commandObject = localCommands.find((cmd) => cmd.name === interaction.commandName);
 
         if (!commandObject) return;
@@ -25,6 +32,36 @@ async function interactionHandler(client, interaction) {
                     content: `Du brauchst diese Berechtigungen für **${commandObject.name}**: ${commandObject.permissionsRequired.join(', ')}`,
                     flags: MessageFlags.Ephemeral,
                 });
+            }
+        }
+
+        if (commandObject.requiresGuildManagement) {
+            if (!interaction.inGuild()) {
+                return interaction.reply({
+                    content: 'Dieser Befehl kann nur auf einem Server verwendet werden.',
+                    flags: MessageFlags.Ephemeral,
+                });
+            }
+
+            const isAdministrator = interaction.memberPermissions?.has(
+                PermissionFlagsBits.Administrator,
+            );
+            if (!isAdministrator) {
+                const settings = await guildService.getGuild(interaction.guildId);
+                const allowedRoleIds = settings?.managementRoleIds ?? [];
+                let memberRoles = interaction.member?.roles?.cache;
+                if (!memberRoles) {
+                    const member = await interaction.guild.members.fetch(interaction.user.id);
+                    memberRoles = member.roles.cache;
+                }
+
+                const hasAllowedRole = allowedRoleIds.some((roleId) => memberRoles.has(roleId));
+                if (!hasAllowedRole) {
+                    return interaction.reply({
+                        content: 'Du benötigst Administratorrechte oder eine konfigurierte Verwaltungsrolle.',
+                        flags: MessageFlags.Ephemeral,
+                    });
+                }
             }
         }
 

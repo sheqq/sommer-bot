@@ -35,6 +35,12 @@ function createApiClient({
             model.colorsEnabled = guild.colorsEnabled;
             model.maxColorRoles = guild.maxColorRoles;
             model.createAllowedRoleIds = guild.createAllowedRoleIds;
+            model.managementRoleIds = guild.managementRoleIds;
+            model.levelRoles = guild.levelRoles;
+            model.selfRolePanels = guild.selfRolePanels;
+            model.welcomeChannelId = guild.welcomeChannelId;
+            model.welcomeMessage = guild.welcomeMessage;
+            model.welcomeImageUrl = guild.welcomeImageUrl;
             return guildsApi.createGuild(model);
         },
 
@@ -45,6 +51,12 @@ function createApiClient({
             model.colorsEnabled = guild.colorsEnabled;
             model.maxColorRoles = guild.maxColorRoles;
             model.createAllowedRoleIds = guild.createAllowedRoleIds;
+            model.managementRoleIds = guild.managementRoleIds;
+            model.levelRoles = guild.levelRoles;
+            model.selfRolePanels = guild.selfRolePanels;
+            model.welcomeChannelId = guild.welcomeChannelId;
+            model.welcomeMessage = guild.welcomeMessage;
+            model.welcomeImageUrl = guild.welcomeImageUrl;
             return guildsApi.updateGuild(guildId, model);
         },
 

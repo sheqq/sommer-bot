@@ -36,6 +36,18 @@ API_TOKEN=dein_api_token
 `guildId` wird für die Slash-Command-Registrierung und den Farbrollen-Abgleich benötigt.
 `devId` beschränkt Entwickler-Commands. Eine `clientId` wird vom Bot nicht verwendet.
 
+## Server-Funktionen
+
+- `/levelrolle hinzufuegen rolle level` verknüpft eine Rolle mit dem Level, ab
+  dem sie vergeben wird. `entfernen` und `anzeigen` verwalten die Zuordnungen.
+- `/selbstrollen-nachricht` erstellt eine Nachricht mit bis zu 20 auswählbaren
+  Rollen; jede Auswahl schaltet die jeweilige Rolle um.
+- `/willkommen setzen kanal nachricht bild` konfiguriert Begrüßungen neuer
+  Mitglieder; `bild` ist eine optionale HTTPS-Bild-URL.
+  Platzhalter: `{user}`, `{username}`, `{server}`, `{memberCount}`.
+- `/verwaltung-rechte` verwaltet Rollen, die diese Einstellungen ändern dürfen.
+  Administratoren haben immer Zugriff.
+
 ## API-Dokumentation
 
 `npm run build` erzeugt aus `src/api/sommer-facade.yaml` die HTML-Dokumentation unter `docs/api.html`.
