@@ -1,7 +1,7 @@
 const { PermissionFlagsBits } = require('discord.js');
 
 module.exports = {
-    name: 'clear',
+    name: 'nachrichten-loeschen',
     description: 'Nachrichten löschen',
     options: [
         {

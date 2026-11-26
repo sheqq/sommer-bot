@@ -3,8 +3,15 @@ const Module = require('module');
 const { MessageFlags } = require('discord.js');
 
 const calls = [];
-let colorsEnabled = true;
 let replyContent;
+let assignedLimit;
+let canUseByRole = true;
+let isAdministrator = false;
+let settings = {
+    colorsEnabled: true,
+    maxColorRoles: 25,
+    createAllowedRoleIds: ['allowed-role'],
+};
 
 function mockModule(modulePath, exports) {
     const resolvedPath = require.resolve(modulePath);
@@ -16,30 +23,40 @@ function mockModule(modulePath, exports) {
 }
 
 mockModule('../src/services/roleService', {
-    assignColorToMember: async () => {
+    assignColorToMember: async (_member, _color, maxColorRoles) => {
         calls.push('assignColor');
+        assignedLimit = maxColorRoles;
         return { role: { name: '#123456' }, warnings: [] };
     },
     createRandomColor: () => '#123456',
 });
 
 mockModule('../src/services/guildService', {
-    areColorsEnabled: async () => {
-        calls.push('checkColors');
-        return colorsEnabled;
+    getGuild: async () => {
+        calls.push('getSettings');
+        return settings;
+    },
+    setCreateAllowedRoleIds: async (_guild, roleIds) => {
+        calls.push('saveAllowedRoles');
+        settings = { ...settings, createAllowedRoleIds: roleIds };
     },
 });
 
 const command = require('../src/commands/moderation/createColor');
+const permissionsCommand = require('../src/commands/moderation/createPermissions');
 
 function createInteraction() {
     return {
         guildId: 'guild-id',
         guild: {
             members: {
-                fetch: async () => {
+                fetch: async (userId) => {
                     calls.push('fetchMember');
-                    return {};
+                    return {
+                        id: userId,
+                        permissions: { has: () => isAdministrator },
+                        roles: { cache: { has: () => canUseByRole } },
+                    };
                 },
             },
         },
@@ -47,7 +64,7 @@ function createInteraction() {
             getUser: () => null,
             getString: () => null,
         },
-        user: { tag: 'tester' },
+        user: { id: 'user-id', tag: 'tester' },
         deferReply: async (options) => {
             calls.push('deferReply');
             assert.deepStrictEqual(options, { flags: MessageFlags.Ephemeral });
@@ -62,29 +79,103 @@ function createInteraction() {
     };
 }
 
+function createPermissionsInteraction(subcommand, role) {
+    return {
+        guildId: 'guild-id',
+        guild: {
+            roles: {
+                cache: {
+                    get: (roleId) => roleId === role.id ? role : undefined,
+                },
+            },
+        },
+        options: {
+            getSubcommand: () => subcommand,
+            getRole: () => role,
+        },
+        deferReply: async (options) => {
+            calls.push('deferReply');
+            assert.deepStrictEqual(options, { flags: MessageFlags.Ephemeral });
+        },
+        editReply: async (content) => {
+            calls.push('editReply');
+            replyContent = content;
+        },
+    };
+}
+
 async function run() {
     const interaction = createInteraction();
     await command.callback({}, interaction);
     assert.deepStrictEqual(calls, [
         'deferReply',
-        'checkColors',
+        'getSettings',
         'fetchMember',
         'assignColor',
         'editReply',
     ]);
+    assert.strictEqual(assignedLimit, 25);
     assert.match(replyContent.content, /wurde erstellt\/gewählt/);
 
     calls.length = 0;
     replyContent = undefined;
-    colorsEnabled = false;
+    settings = { colorsEnabled: false };
     await command.callback({}, interaction);
-    assert.deepStrictEqual(calls, ['deferReply', 'checkColors', 'editReply']);
+    assert.deepStrictEqual(calls, ['deferReply', 'getSettings', 'editReply']);
     assert.strictEqual(
         replyContent,
         'Farbrollen sind auf diesem Server deaktiviert.',
     );
 
-    console.log('OK: /create bestätigt Interactions vor langsamer Arbeit.');
+    calls.length = 0;
+    replyContent = undefined;
+    settings = {
+        colorsEnabled: true,
+        maxColorRoles: 25,
+        createAllowedRoleIds: ['allowed-role'],
+    };
+    canUseByRole = false;
+    await command.callback({}, interaction);
+    assert.deepStrictEqual(calls, [
+        'deferReply',
+        'getSettings',
+        'fetchMember',
+        'editReply',
+    ]);
+    assert.match(replyContent, /keine Berechtigung/);
+
+    calls.length = 0;
+    replyContent = undefined;
+    settings = { createAllowedRoleIds: [] };
+    const role = { id: 'new-role', toString: () => '<@&new-role>' };
+    await permissionsCommand.callback(
+        {},
+        createPermissionsInteraction('hinzufuegen', role),
+    );
+    assert.deepStrictEqual(calls, [
+        'deferReply',
+        'getSettings',
+        'saveAllowedRoles',
+        'editReply',
+    ]);
+    assert.deepStrictEqual(settings.createAllowedRoleIds, ['new-role']);
+    assert.match(replyContent, /darf jetzt `\/farbrolle-erstellen` verwenden/);
+
+    calls.length = 0;
+    replyContent = undefined;
+    await permissionsCommand.callback(
+        {},
+        createPermissionsInteraction('entfernen', role),
+    );
+    assert.deepStrictEqual(calls, [
+        'deferReply',
+        'getSettings',
+        'saveAllowedRoles',
+        'editReply',
+    ]);
+    assert.deepStrictEqual(settings.createAllowedRoleIds, []);
+
+    console.log('OK: /farbrolle-erstellen und /farbrollen-rechte prüfen Guild-Rechte.');
 }
 
 run().catch((error) => {

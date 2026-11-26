@@ -5,8 +5,12 @@ async function run() {
     const deletedIds = [];
     const guildCommands = [
         {
-            id: 'guild-ping',
-            name: 'ping',
+            id: 'guild-response-time',
+            name: 'antwortzeit',
+        },
+        {
+            id: 'guild-old-create',
+            name: 'create',
         },
         {
             id: 'guild-custom',
@@ -27,10 +31,11 @@ async function run() {
 
     await removeGuildCommandDuplicates(
         { guilds: { cache: new Map([[guild.id, guild]]) } },
-        new Map([['global-ping', { name: 'ping' }]])
+        new Map([['global-response-time', { name: 'antwortzeit' }]]),
+        ['create']
     );
 
-    assert.deepEqual(deletedIds, ['guild-ping']);
+    assert.deepEqual(deletedIds, ['guild-response-time', 'guild-old-create']);
     console.log('OK: doppelte Guild-Commands werden entfernt, unabhängige bleiben erhalten.');
 }
 

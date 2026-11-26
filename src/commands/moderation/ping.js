@@ -1,5 +1,5 @@
 module.exports = {
-    name: 'ping',
+    name: 'antwortzeit',
     description: 'Zeigt die Antwortzeit des Bots an',
 
     callback: async (client, interaction) => {

@@ -14,7 +14,7 @@
     "build": "npm run check",
     "pretest": "npm run generate:api",
     "check": "node scripts/check.js",
-    "test": "npm run check && node scripts/test-jsonService.js && node scripts/test-apiClient.js && node scripts/test-levels.js && node scripts/test-colorRoles.js && node scripts/test-createColorCommand.js"
+    "test": "npm run check && node scripts/test-jsonService.js && node scripts/test-apiClient.js && node scripts/test-levels.js && node scripts/test-colorRoles.js && node scripts/test-createColorCommand.js && node scripts/test-commandRegistration.js && node scripts/test-guildMemberAdd.js"
   },
   "engines": {
     "node": ">=22.13.1"

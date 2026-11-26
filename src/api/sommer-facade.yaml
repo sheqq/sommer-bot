@@ -267,6 +267,18 @@ components:
             - type: "null"
         colorsEnabled:
           $ref: '#/components/schemas/ColorsEnabled'
+        maxColorRoles:
+          type: integer
+          minimum: 1
+          maximum: 250
+          default: 100
+          example: 100
+        createAllowedRoleIds:
+          type: array
+          uniqueItems: true
+          items:
+            type: string
+          description: Discord-Rollen-IDs, die /farbrolle-erstellen ausführen dürfen
     User:
       type: object
       required:

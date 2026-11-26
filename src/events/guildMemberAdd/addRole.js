@@ -1,22 +1,30 @@
-const { assignColorToMember } = require('../../services/roleService');
+const {
+    assignColorToMember,
+    createRandomColor,
+    getRandomColorRole,
+} = require('../../services/roleService');
 const guildService = require('../../services/guildService');
 
 module.exports = async (_client, member) => {
     if (member.user.bot) return;
 
-    let colorsEnabled;
+    let settings;
     try {
-        colorsEnabled = await guildService.areColorsEnabled(member.guild.id);
+        settings = await guildService.getGuild(member.guild.id);
     } catch (error) {
         console.error(`Farbkonfiguration für Server ${member.guild.id} konnte nicht geladen werden:`, error?.message || error);
         return;
     }
 
-    if (!colorsEnabled) return;
+    if (!settings?.colorsEnabled) return;
 
-    const chosenColor = '#' + (Math.random() * 0xFFFFFF << 0).toString(16).padStart(6, '0');
+    const chosenColor = getRandomColorRole(member.guild)?.name || createRandomColor();
     try {
-        const { warnings } = await assignColorToMember(member, chosenColor);
+        const { warnings } = await assignColorToMember(
+            member,
+            chosenColor,
+            settings.maxColorRoles ?? 100,
+        );
         for (const warning of warnings) {
             console.error(`Farbrolle für ${member.user.tag}:`, warning.message);
         }

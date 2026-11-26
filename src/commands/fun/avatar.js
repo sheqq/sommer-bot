@@ -1,7 +1,7 @@
 const { ApplicationCommandOptionType } = require('discord.js');
 
 module.exports = {
-    name: 'avatar',
+    name: 'profilbild',
     description: 'Zeigt dein Profilbild oder das eines anderen Nutzers',
     options: [
         {

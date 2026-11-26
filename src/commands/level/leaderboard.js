@@ -3,7 +3,7 @@ const levelService = require('../../services/levelService');
 const { getLevelFromXp, getXp } = require('../../utils/levels');
 
 module.exports = {
-    name: 'leaderboard',
+    name: 'rangliste',
     description: 'Zeigt die Top 10 Level-Spieler an',
     options: [
         {

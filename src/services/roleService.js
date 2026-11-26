@@ -1,6 +1,16 @@
 const { PermissionFlagsBits } = require('discord.js');
 
 const COLOR_PATTERN = /^#[0-9A-F]{6}$/i;
+const DEFAULT_MAX_COLOR_ROLES = 100;
+const MAX_COLOR_ROLES = 250;
+const colorRoleCreationQueues = new Map();
+
+class ColorRoleLimitError extends Error {
+    constructor(limit) {
+        super(`Die Obergrenze von ${limit} Farbrollen ist erreicht.`);
+        this.name = 'ColorRoleLimitError';
+    }
+}
 
 function normalizeColor(color) {
     if (typeof color !== 'string' || !COLOR_PATTERN.test(color)) {
@@ -12,6 +22,13 @@ function normalizeColor(color) {
 
 function isColorRole(role) {
     return COLOR_PATTERN.test(role.name);
+}
+
+function getRandomColorRole(guild) {
+    const colorRoles = [...guild.roles.cache.values()].filter(isColorRole);
+    if (colorRoles.length === 0) return null;
+
+    return colorRoles[Math.floor(Math.random() * colorRoles.length)];
 }
 
 function assertCanManageRole(role, action) {
@@ -66,8 +83,18 @@ async function removeMemberRole(member, role) {
     }
 }
 
-async function createColorRole(guild, color) {
+async function createColorRole(
+    guild,
+    color,
+    maxColorRoles = DEFAULT_MAX_COLOR_ROLES
+) {
     const normalizedColor = normalizeColor(color);
+    const colorRoleLimit = normalizeMaxColorRoles(maxColorRoles);
+    const colorRoleCount = guild.roles.cache.filter(isColorRole).size;
+    if (colorRoleCount >= colorRoleLimit) {
+        throw new ColorRoleLimitError(colorRoleLimit);
+    }
+
     const highestBotRole = guild.members.me?.roles.highest;
 
     if (!highestBotRole) {
@@ -86,11 +113,45 @@ function createRandomColor() {
     return '#' + (Math.random() * 0xFFFFFF << 0).toString(16).padStart(6, '0').toUpperCase();
 }
 
-async function ensureRoleForColor(guild, color) {
+function normalizeMaxColorRoles(limit = DEFAULT_MAX_COLOR_ROLES) {
+    if (!Number.isInteger(limit) || limit < 1 || limit > MAX_COLOR_ROLES) {
+        throw new RangeError(`Die Obergrenze für Farbrollen muss zwischen 1 und ${MAX_COLOR_ROLES} liegen.`);
+    }
+
+    return limit;
+}
+
+async function withGuildRoleCreationLock(guildId, action) {
+    const previous = colorRoleCreationQueues.get(guildId) || Promise.resolve();
+    let release;
+    const current = new Promise((resolve) => {
+        release = resolve;
+    });
+    colorRoleCreationQueues.set(guildId, current);
+    await previous;
+
+    try {
+        return await action();
+    } finally {
+        release();
+        if (colorRoleCreationQueues.get(guildId) === current) {
+            colorRoleCreationQueues.delete(guildId);
+        }
+    }
+}
+
+async function ensureRoleForColor(guild, color, maxColorRoles) {
     const existingRole = guild.roles.cache.find(
         (role) => isColorRole(role) && normalizeColor(role.name) === color
     );
-    return existingRole || createColorRole(guild, color);
+    if (existingRole) return existingRole;
+
+    return withGuildRoleCreationLock(guild.id, async () => {
+        const role = guild.roles.cache.find(
+            (cachedRole) => isColorRole(cachedRole) && normalizeColor(cachedRole.name) === color
+        );
+        return role || createColorRole(guild, color, maxColorRoles);
+    });
 }
 
 function getRemainingMembers(role, memberId) {
@@ -105,9 +166,17 @@ async function deleteEmptyRole(role, warnings) {
     }
 }
 
-async function assignColorToMember(member, color) {
+async function assignColorToMember(
+    member,
+    color,
+    maxColorRoles = DEFAULT_MAX_COLOR_ROLES
+) {
     const normalizedColor = normalizeColor(color);
-    const role = await ensureRoleForColor(member.guild, normalizedColor);
+    const role = await ensureRoleForColor(
+        member.guild,
+        normalizedColor,
+        normalizeMaxColorRoles(maxColorRoles)
+    );
     const previousColorRoles = [...member.roles.cache.values()]
         .filter((memberRole) => isColorRole(memberRole) && memberRole.id !== role.id);
     const warnings = [];
@@ -196,30 +265,48 @@ async function deleteAllColorRoles(guild) {
     return colorRoles.length;
 }
 
-async function assignColorRolesToAllMembers(guild) {
+async function assignColorRolesToAllMembers(
+    guild,
+    maxColorRoles = DEFAULT_MAX_COLOR_ROLES
+) {
     const members = await fetchGuildMembersWithRetry(guild);
     const failures = [];
     const warnings = [];
     let assigned = 0;
     let eligible = 0;
+    let skipped = 0;
+    let limitReached = false;
 
     for (const member of members.values()) {
         if (member.user.bot) continue;
         eligible += 1;
+        if (limitReached) {
+            skipped += 1;
+            continue;
+        }
 
         try {
-            const result = await assignColorToMember(member, createRandomColor());
+            const result = await assignColorToMember(
+                member,
+                createRandomColor(),
+                maxColorRoles
+            );
             assigned += 1;
             warnings.push(...result.warnings.map((error) => ({
                 member,
                 error,
             })));
         } catch (error) {
+            if (error instanceof ColorRoleLimitError) {
+                limitReached = true;
+                skipped += 1;
+                continue;
+            }
             failures.push({ member, error });
         }
     }
 
-    return { assigned, eligible, failures, warnings };
+    return { assigned, eligible, failures, warnings, skipped, limitReached };
 }
 
 async function fetchGuildMembersWithRetry(guild) {
@@ -243,6 +330,7 @@ async function fetchGuildMembersWithRetry(guild) {
 
 module.exports = {
     createRandomColor,
+    getRandomColorRole,
     createColorRole,
     deleteColorRole,
     assignColorToMember,

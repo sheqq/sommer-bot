@@ -33,6 +33,8 @@ function createApiClient({
             model.name = guild.name;
             model.iconUrl = guild.iconUrl;
             model.colorsEnabled = guild.colorsEnabled;
+            model.maxColorRoles = guild.maxColorRoles;
+            model.createAllowedRoleIds = guild.createAllowedRoleIds;
             return guildsApi.createGuild(model);
         },
 
@@ -41,6 +43,8 @@ function createApiClient({
             model.name = guild.name;
             model.iconUrl = guild.iconUrl;
             model.colorsEnabled = guild.colorsEnabled;
+            model.maxColorRoles = guild.maxColorRoles;
+            model.createAllowedRoleIds = guild.createAllowedRoleIds;
             return guildsApi.updateGuild(guildId, model);
         },
 

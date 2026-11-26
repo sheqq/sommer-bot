@@ -3,7 +3,7 @@ const levelService = require('../../services/levelService');
 const { getXpProgress } = require('../../utils/levels');
 
 module.exports = {
-    name: 'level',
+    name: 'levelstand',
     description: 'Zeigt den aktuellen Level-Stand an',
     options: [
         {

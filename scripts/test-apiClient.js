@@ -29,7 +29,12 @@ async function run() {
                 response.writeHead(500).end('API failed');
             } else if (request.method === 'GET' && request.url === '/api/v1/guild/guild') {
                 response.writeHead(200, { 'Content-Type': 'application/json' }).end(
-                    JSON.stringify({ guildId: 'guild', colorsEnabled: true })
+                    JSON.stringify({
+                        guildId: 'guild',
+                        colorsEnabled: true,
+                        maxColorRoles: 75,
+                        createAllowedRoleIds: ['allowed-role'],
+                    })
                 );
             } else if (request.method === 'DELETE') {
                 response.writeHead(204).end();
@@ -73,12 +78,16 @@ async function run() {
         const guild = await client.getGuild('guild');
         assert(guild instanceof Guild);
         assert.strictEqual(guild.colorsEnabled, true);
+        assert.strictEqual(guild.maxColorRoles, 75);
+        assert.deepStrictEqual(guild.createAllowedRoleIds, ['allowed-role']);
         assert.strictEqual(await client.getGuild('missing'), null);
         const newGuild = {
             guildId: 'guild',
             name: 'Guild',
             iconUrl: null,
             colorsEnabled: true,
+            maxColorRoles: 100,
+            createAllowedRoleIds: ['allowed-role'],
         };
         assert((await client.createGuild(newGuild)) instanceof Guild);
         assert.strictEqual(calls[8].method, 'POST');
@@ -140,14 +149,23 @@ async function run() {
             name: 'Guild',
             iconUrl: null,
             colorsEnabled: true,
+            maxColorRoles: 100,
+            createAllowedRoleIds: [],
         });
-        existingGuild = { guildId: 'guild', colorsEnabled: false };
+        existingGuild = {
+            guildId: 'guild',
+            colorsEnabled: false,
+            maxColorRoles: 42,
+            createAllowedRoleIds: ['allowed-role'],
+        };
         createGuildConflict = true;
         assert.deepStrictEqual(await guildService.registerGuild(guild), {
             guildId: 'guild',
             name: 'Guild',
             iconUrl: null,
             colorsEnabled: false,
+            maxColorRoles: 42,
+            createAllowedRoleIds: ['allowed-role'],
         });
         assert.deepStrictEqual(updatedGuilds, [{
             guildId: 'guild',
@@ -156,6 +174,8 @@ async function run() {
                 name: 'Guild',
                 iconUrl: null,
                 colorsEnabled: false,
+                maxColorRoles: 42,
+                createAllowedRoleIds: ['allowed-role'],
             },
         }]);
         assert.strictEqual(await guildService.areColorsEnabled('guild'), false);
@@ -172,8 +192,29 @@ async function run() {
                 name: 'Updated name',
                 iconUrl: 'https://example.com/icon.png',
                 colorsEnabled: true,
+                maxColorRoles: 42,
+                createAllowedRoleIds: ['allowed-role'],
             },
         });
+        await guildService.setMaxColorRoles(discordGuild, 50);
+        assert.deepStrictEqual(updatedGuilds[2], {
+            guildId: 'guild',
+            guild: {
+                guildId: 'guild',
+                name: 'Updated name',
+                iconUrl: 'https://example.com/icon.png',
+                colorsEnabled: false,
+                maxColorRoles: 50,
+                createAllowedRoleIds: ['allowed-role'],
+            },
+        });
+        await guildService.setCreateAllowedRoleIds(discordGuild, ['role-1', 'role-1']);
+        assert.deepStrictEqual(updatedGuilds[3].guild.createAllowedRoleIds, ['role-1']);
+        assert.strictEqual(updatedGuilds[3].guild.maxColorRoles, 42);
+        await assert.rejects(
+            guildService.setMaxColorRoles(discordGuild, 251),
+            RangeError,
+        );
 
         const registeredGuildIds = [];
         guildService.registerGuild = async (guild) => registeredGuildIds.push(guild.id);

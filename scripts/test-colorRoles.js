@@ -1,5 +1,6 @@
 const assert = require('assert');
 const {
+    assignColorToMember,
     assignColorRolesToAllMembers,
     deleteAllColorRoles,
 } = require('../src/services/roleService');
@@ -48,6 +49,7 @@ async function run() {
     for (const member of members) {
         member.guild = guild;
     }
+    guild.id = 'guild-1';
 
     const assigned = await assignColorRolesToAllMembers(guild);
     assert.strictEqual(memberFetchAttempts, 2);
@@ -61,6 +63,26 @@ async function run() {
     assert.strictEqual(members[0].roles.cache.size, 1);
     assert.strictEqual(members[1].roles.cache.size, 1);
     assert.strictEqual(members[2].roles.cache.size, 0);
+
+    const sharedColorMembers = [
+        createMember('user-3', false),
+        createMember('user-4', false),
+    ];
+    for (const member of sharedColorMembers) {
+        member.guild = guild;
+    }
+    const rolesCreatedBeforeSharedColor = createOptions.length;
+    await assignColorToMember(sharedColorMembers[0], '#A1B2C3', 100);
+    await assignColorToMember(sharedColorMembers[1], '#a1b2c3', 100);
+    const sharedRoleId = [...sharedColorMembers[0].roles.cache.keys()][0];
+    assert.strictEqual(createOptions.length, rolesCreatedBeforeSharedColor + 1);
+    assert.strictEqual([...sharedColorMembers[1].roles.cache.keys()][0], sharedRoleId);
+
+    await assert.rejects(
+        assignColorToMember(members[0], '#000000', 3),
+        (error) => error.name === 'ColorRoleLimitError',
+    );
+    assert.strictEqual(guild.roles.cache.size, 3);
 
     const deleted = [];
     const colorRole = (id, name) => ({
@@ -88,7 +110,7 @@ async function run() {
     assert.strictEqual(deletedCount, 2);
     assert.deepStrictEqual(deleted, ['color-1', 'color-2']);
 
-    console.log('OK: Farbrollen-Aktivierung und -Deaktivierung geprüft.');
+    console.log('OK: Gemeinsame Farbrollen und Obergrenze geprüft.');
 }
 
 function createMember(id, bot) {
@@ -107,6 +129,8 @@ function createMember(id, bot) {
 function createCollection(entries = []) {
     const collection = new Map(entries.map((role) => [role.id, role]));
     collection.find = (callback) => [...collection.values()].find(callback);
+    collection.filter = (callback) =>
+        createCollection([...collection.values()].filter(callback));
     return collection;
 }
 

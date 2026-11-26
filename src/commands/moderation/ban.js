@@ -3,7 +3,7 @@ const { unassignColorFromMember } = require('../../services/roleService');
 const levelService = require('../../services/levelService');
 
 module.exports = {
-    name: 'ban',
+    name: 'nutzer-bannen',
     description: 'Einen Nutzer bannen',
     options: [
         {
