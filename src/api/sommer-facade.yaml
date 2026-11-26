@@ -2,7 +2,7 @@ openapi: 3.1.0
 info:
   title: sommer-facade
   description: REST API für sommer-bot.vercel.app
-  version: 0.0.4
+  version: 0.0.5
 
 servers:
   - url: https://sommer-bot.vercel.app/api/v1
@@ -228,9 +228,14 @@ components:
       example: "Max"
     XP:
       type: integer
-      example: 100
+      minimum: 0
+      description: XP-Fortschritt im aktuellen Level; bei Levelaufstieg wird der Wert auf 0 gesetzt
+      example: 0
     LevelNumber:
       type: integer
+      minimum: 1
+      default: 1
+      description: Aktuelles Level; der nächste Aufstieg erfordert Level * 100 XP
       example: 5
     Level:
       type: object
@@ -333,6 +338,31 @@ components:
             - type: string
               format: uri
               maxLength: 1000
+            - type: "null"
+        spamProtection:
+          description: Nachrichtengrenze und automatisch verwaltete Mute-Rolle oder null
+          anyOf:
+            - type: object
+              required: [messagesPerMinute, muteRoleId, muteRoleName, mutedMemberIds]
+              properties:
+                messagesPerMinute:
+                  type: integer
+                  minimum: 1
+                  maximum: 120
+                muteRoleId:
+                  anyOf:
+                    - type: string
+                    - type: "null"
+                muteRoleName:
+                  type: string
+                  minLength: 1
+                  maxLength: 100
+                mutedMemberIds:
+                  type: array
+                  maxItems: 10000
+                  uniqueItems: true
+                  items:
+                    type: string
             - type: "null"
     User:
       type: object

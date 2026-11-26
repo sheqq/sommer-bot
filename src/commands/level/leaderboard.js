@@ -1,6 +1,6 @@
 const { ApplicationCommandOptionType, PermissionFlagsBits } = require('discord.js');
 const levelService = require('../../services/levelService');
-const { getLevelFromXp, getXp } = require('../../utils/levels');
+const { getLevelProgress } = require('../../utils/levels');
 
 module.exports = {
     name: 'rangliste',
@@ -30,11 +30,14 @@ module.exports = {
         }
 
         const sorted = levels
-            .filter(level => getXp(level.xp) > 0)
+            .filter((entry) => {
+                const progress = getLevelProgress(entry);
+                return progress.level > 1 || progress.xp > 0;
+            })
             .sort((a, b) => {
-                const levelDiff = getLevelFromXp(b.xp) - getLevelFromXp(a.xp);
+                const levelDiff = getLevelProgress(b).level - getLevelProgress(a).level;
                 if (levelDiff !== 0) return levelDiff;
-                return getXp(b.xp) - getXp(a.xp);
+                return getLevelProgress(b).xp - getLevelProgress(a).xp;
             })
             .slice(0, limit);
 
@@ -50,17 +53,10 @@ module.exports = {
         for (let i = 0; i < sorted.length; i++) {
             const userLevel = sorted[i];
             const userId = userLevel.userId;
-            const level = getLevelFromXp(userLevel.xp);
-            const xp = getXp(userLevel.xp);
+            const { level, xp } = getLevelProgress(userLevel);
 
-            // Versuche, den Benutzernamen zu erhalten
-            let userName = `<@${userId}>`;
-            try {
-                const user = await client.users.fetch(userId);
-                userName = user.username;
-            } catch {
-                userName = `Nutzer ${userId}`;
-            }
+            const member = interaction.guild.members.cache.get(userId);
+            const userName = member?.displayName || `<@${userId}>`;
 
             const medal = i === 0 ? '🥇' : i === 1 ? '🥈' : i === 2 ? '🥉' : `\`${i + 1}.\``;
             leaderboardText += `${medal} **${userName}** - Level **${level}** (${xp} XP)\n`;

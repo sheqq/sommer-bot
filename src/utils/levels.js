@@ -38,8 +38,19 @@ function getXpProgress(xp) {
     return { level, xp: remainingXp, nextLevelXp };
 }
 
+function getLevelProgress(entry) {
+    if (entry && typeof entry === 'object' && Number.isInteger(Number(entry.level))) {
+        const level = Math.max(Number(entry.level), 1);
+        const xp = Math.max(Number(entry.xp) || 0, 0);
+        return { level, xp, nextLevelXp: level * 100 };
+    }
+
+    return getXpProgress(entry && typeof entry === 'object' ? entry.xp : entry);
+}
+
 module.exports = {
     getXp,
     getLevelFromXp,
     getXpProgress,
+    getLevelProgress,
 };

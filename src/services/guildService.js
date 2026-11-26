@@ -16,6 +16,7 @@ function guildUpdatePayload(guild, existingGuild) {
         welcomeChannelId: existingGuild.welcomeChannelId ?? null,
         welcomeMessage: existingGuild.welcomeMessage ?? null,
         welcomeImageUrl: existingGuild.welcomeImageUrl ?? null,
+        spamProtection: existingGuild.spamProtection ?? null,
     };
 }
 
@@ -51,6 +52,7 @@ module.exports = {
                 welcomeChannelId: null,
                 welcomeMessage: null,
                 welcomeImageUrl: null,
+                spamProtection: null,
             });
         } catch (error) {
             if (error?.status !== 409) {
@@ -74,6 +76,7 @@ module.exports = {
                 welcomeChannelId: existingGuild.welcomeChannelId ?? null,
                 welcomeMessage: existingGuild.welcomeMessage ?? null,
                 welcomeImageUrl: existingGuild.welcomeImageUrl ?? null,
+                spamProtection: existingGuild.spamProtection ?? null,
             });
         }
     },
@@ -177,6 +180,29 @@ module.exports = {
             welcomeMessage,
             welcomeImageUrl,
         });
+    },
+
+    async setSpamProtection(guild, spamProtection) {
+        if (
+            spamProtection !== null &&
+            (
+                !Number.isInteger(spamProtection.messagesPerMinute) ||
+                spamProtection.messagesPerMinute < 1 ||
+                spamProtection.messagesPerMinute > 120 ||
+                typeof spamProtection.muteRoleName !== 'string' ||
+                spamProtection.muteRoleName.trim().length === 0 ||
+                spamProtection.muteRoleName.length > 100 ||
+                (spamProtection.muteRoleId !== null &&
+                    (typeof spamProtection.muteRoleId !== 'string' || !spamProtection.muteRoleId)) ||
+                !Array.isArray(spamProtection.mutedMemberIds) ||
+                spamProtection.mutedMemberIds.length > 10000 ||
+                spamProtection.mutedMemberIds.some((id) => typeof id !== 'string' || !id) ||
+                new Set(spamProtection.mutedMemberIds).size !== spamProtection.mutedMemberIds.length
+            )
+        ) {
+            throw new RangeError('Die Spam-Schutz-Konfiguration ist ungültig.');
+        }
+        return updateGuildSettings(guild, { spamProtection });
     },
 };
 

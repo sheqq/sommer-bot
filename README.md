@@ -38,6 +38,10 @@ API_TOKEN=dein_api_token
 
 ## Server-Funktionen
 
+- Mitglieder starten auf Level 1 mit 0 XP. Der nächste Levelaufstieg benötigt
+  `aktuelles Level * 100` XP; dabei wird der Fortschritt auf 0 zurückgesetzt.
+  Es gibt 10 XP höchstens einmal pro Minute. `/levelstand` zeigt den Fortschritt,
+  `/rangliste` die Server-Topliste.
 - `/levelrolle hinzufuegen rolle level` verknüpft eine Rolle mit dem Level, ab
   dem sie vergeben wird. `entfernen` und `anzeigen` verwalten die Zuordnungen.
 - `/selbstrollen-nachricht` erstellt eine Nachricht mit bis zu 20 auswählbaren

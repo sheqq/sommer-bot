@@ -1,6 +1,6 @@
 const { ApplicationCommandOptionType, MessageFlags, PermissionFlagsBits } = require('discord.js');
 const levelService = require('../../services/levelService');
-const { getXpProgress } = require('../../utils/levels');
+const { getLevelProgress } = require('../../utils/levels');
 
 module.exports = {
     name: 'levelstand',
@@ -17,8 +17,7 @@ module.exports = {
 
     callback: async (_client, interaction) => {
         const targetUser = interaction.options.getUser('nutzer') || interaction.user;
-        const levels = await levelService.getAllUserEntries(interaction.guildId);
-        const entry = levels.find((level) => level.userId === targetUser.id);
+        const entry = await levelService.getUserEntry(targetUser.id, interaction.guildId);
 
         if (!entry) {
             return interaction.reply({
@@ -27,7 +26,7 @@ module.exports = {
             });
         }
 
-        const { level, xp, nextLevelXp } = getXpProgress(entry.xp);
+        const { level, xp, nextLevelXp } = getLevelProgress(entry);
         const progressText = `${xp}/${nextLevelXp} XP`;
 
         return interaction.reply({

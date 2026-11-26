@@ -9,22 +9,22 @@ module.exports = {
         return apiClient.getAllLevels(guildId);
     },
 
-    async setUserXp(userId, xp, guildId) {
-        const level = { guildId, userId, xp };
+    async setUserXp(userId, xp, guildId, level = 1) {
+        const levelEntry = { guildId, userId, xp, level };
         const existing = await apiClient.getUserLevel(guildId, userId);
 
         if (existing) {
-            return apiClient.updateLevel(guildId, userId, level);
+            return apiClient.updateLevel(guildId, userId, levelEntry);
         }
 
         try {
-            return await apiClient.createLevel(level);
+            return await apiClient.createLevel(levelEntry);
         } catch (error) {
             if (error?.status !== 409) {
                 throw error;
             }
 
-            return apiClient.updateLevel(guildId, userId, level);
+            return apiClient.updateLevel(guildId, userId, levelEntry);
         }
     },
 

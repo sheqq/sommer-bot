@@ -44,6 +44,12 @@ async function run() {
                         welcomeChannelId: 'welcome-channel',
                         welcomeMessage: 'Willkommen, {user}!',
                         welcomeImageUrl: 'https://example.com/welcome.png',
+                        spamProtection: {
+                            messagesPerMinute: 5,
+                            muteRoleId: 'mute-role',
+                            muteRoleName: 'Stumm',
+                            mutedMemberIds: ['muted-user'],
+                        },
                     })
                 );
             } else if (request.method === 'DELETE') {
@@ -78,7 +84,7 @@ async function run() {
         assert.strictEqual(await client.deleteLevel('guild', 'user'), null);
         await assert.rejects(client.getAllLevels('guild'), (error) => error.status === 500);
 
-        const newLevel = { guildId: 'guild', userId: 'user', xp: 40 };
+        const newLevel = { guildId: 'guild', userId: 'user', xp: 40, level: 1 };
         assert((await client.createLevel(newLevel)) instanceof Level);
         assert.strictEqual(calls[4].method, 'POST');
         assert.deepStrictEqual(calls[4].body, newLevel);
@@ -102,6 +108,15 @@ async function run() {
         assert.strictEqual(guild.welcomeChannelId, 'welcome-channel');
         assert.strictEqual(guild.welcomeMessage, 'Willkommen, {user}!');
         assert.strictEqual(guild.welcomeImageUrl, 'https://example.com/welcome.png');
+        assert.deepStrictEqual(
+            JSON.parse(JSON.stringify(guild.spamProtection)),
+            {
+                messagesPerMinute: 5,
+                muteRoleId: 'mute-role',
+                muteRoleName: 'Stumm',
+                mutedMemberIds: ['muted-user'],
+            },
+        );
         assert.strictEqual(await client.getGuild('missing'), null);
         const newGuild = {
             guildId: 'guild',
@@ -120,6 +135,12 @@ async function run() {
             welcomeChannelId: 'welcome-channel',
             welcomeMessage: 'Willkommen, {user}!',
             welcomeImageUrl: 'https://example.com/welcome.png',
+            spamProtection: {
+                messagesPerMinute: 5,
+                muteRoleId: 'mute-role',
+                muteRoleName: 'Stumm',
+                mutedMemberIds: ['muted-user'],
+            },
         };
         assert((await client.createGuild(newGuild)) instanceof Guild);
         assert.strictEqual(calls[8].method, 'POST');
@@ -189,6 +210,7 @@ async function run() {
             welcomeChannelId: null,
             welcomeMessage: null,
             welcomeImageUrl: null,
+            spamProtection: null,
         });
         existingGuild = {
             guildId: 'guild',
@@ -205,6 +227,12 @@ async function run() {
             welcomeChannelId: 'welcome-channel',
             welcomeMessage: 'Willkommen, {user}!',
             welcomeImageUrl: 'https://example.com/welcome.png',
+            spamProtection: {
+                messagesPerMinute: 5,
+                muteRoleId: 'mute-role',
+                muteRoleName: 'Stumm',
+                mutedMemberIds: ['muted-user'],
+            },
         };
         createGuildConflict = true;
         assert.deepStrictEqual(await guildService.registerGuild(guild), {
@@ -224,6 +252,12 @@ async function run() {
             welcomeChannelId: 'welcome-channel',
             welcomeMessage: 'Willkommen, {user}!',
             welcomeImageUrl: 'https://example.com/welcome.png',
+            spamProtection: {
+                messagesPerMinute: 5,
+                muteRoleId: 'mute-role',
+                muteRoleName: 'Stumm',
+                mutedMemberIds: ['muted-user'],
+            },
         });
         assert.deepStrictEqual(updatedGuilds, [{
             guildId: 'guild',
@@ -244,6 +278,12 @@ async function run() {
                 welcomeChannelId: 'welcome-channel',
                 welcomeMessage: 'Willkommen, {user}!',
                 welcomeImageUrl: 'https://example.com/welcome.png',
+                spamProtection: {
+                    messagesPerMinute: 5,
+                    muteRoleId: 'mute-role',
+                    muteRoleName: 'Stumm',
+                    mutedMemberIds: ['muted-user'],
+                },
             },
         }]);
         assert.strictEqual(await guildService.areColorsEnabled('guild'), false);
@@ -272,6 +312,12 @@ async function run() {
                 welcomeChannelId: 'welcome-channel',
                 welcomeMessage: 'Willkommen, {user}!',
                 welcomeImageUrl: 'https://example.com/welcome.png',
+                spamProtection: {
+                    messagesPerMinute: 5,
+                    muteRoleId: 'mute-role',
+                    muteRoleName: 'Stumm',
+                    mutedMemberIds: ['muted-user'],
+                },
             },
         });
         await guildService.setMaxColorRoles(discordGuild, 50);
@@ -294,6 +340,12 @@ async function run() {
                 welcomeChannelId: 'welcome-channel',
                 welcomeMessage: 'Willkommen, {user}!',
                 welcomeImageUrl: 'https://example.com/welcome.png',
+                spamProtection: {
+                    messagesPerMinute: 5,
+                    muteRoleId: 'mute-role',
+                    muteRoleName: 'Stumm',
+                    mutedMemberIds: ['muted-user'],
+                },
             },
         });
         await guildService.setCreateAllowedRoleIds(discordGuild, ['role-1', 'role-1']);
@@ -348,7 +400,12 @@ async function run() {
         assert.deepStrictEqual(registeredGuildIds, ['first', 'second']);
 
         const newLevel = await levelService.setUserXp('user', 10, 'guild');
-        assert.deepStrictEqual(newLevel, { guildId: 'guild', userId: 'user', xp: 10 });
+        assert.deepStrictEqual(newLevel, {
+            guildId: 'guild',
+            userId: 'user',
+            xp: 10,
+            level: 1,
+        });
         assert.strictEqual(writes[0].method, 'create');
 
         existingLevel = newLevel;

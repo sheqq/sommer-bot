@@ -41,6 +41,7 @@ function createApiClient({
             model.welcomeChannelId = guild.welcomeChannelId;
             model.welcomeMessage = guild.welcomeMessage;
             model.welcomeImageUrl = guild.welcomeImageUrl;
+            model.spamProtection = guild.spamProtection;
             return guildsApi.createGuild(model);
         },
 
@@ -57,6 +58,7 @@ function createApiClient({
             model.welcomeChannelId = guild.welcomeChannelId;
             model.welcomeMessage = guild.welcomeMessage;
             model.welcomeImageUrl = guild.welcomeImageUrl;
+            model.spamProtection = guild.spamProtection;
             return guildsApi.updateGuild(guildId, model);
         },
 
@@ -77,11 +79,13 @@ function createApiClient({
 
         createLevel(level) {
             const model = new Level(level.guildId, level.userId, level.xp);
+            model.level = level.level;
             return levelsApi.createLevel(level.guildId, model);
         },
 
         updateLevel(guildId, userId, level) {
             const model = new Level(level.guildId, level.userId, level.xp);
+            model.level = level.level;
             return levelsApi.updateLevel(userId, guildId, model);
         },
 
