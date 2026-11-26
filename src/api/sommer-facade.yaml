@@ -2,7 +2,7 @@ openapi: 3.1.0
 info:
   title: sommer-facade
   description: REST API für sommer-bot.vercel.app
-  version: 0.0.2
+  version: 0.0.3
 
 servers:
   - url: https://sommer-bot.vercel.app/api/v1
@@ -268,15 +268,15 @@ components:
         colorsEnabled:
           $ref: '#/components/schemas/ColorsEnabled'
     User:
-        type: object
-        required:
-          - userId
-          - guildId
-        properties:
-          userId:
-            $ref: '#/components/schemas/UserIdentifier'
-          guildId:
-            type: array
-            items:
-              type: string
-            example: ["2347247625478", "2347247625479"]
+      type: object
+      required:
+        - userId
+        - guildId
+      properties:
+        userId:
+          $ref: '#/components/schemas/UserIdentifier'
+        guildId:
+          type: array
+          items:
+            type: string
+          example: ["2347247625478", "2347247625479"]
