@@ -1,6 +1,7 @@
 const getLocalCommands = require('../../utils/getLocalCommands.js');
 const getApplicationCommands = require('../../utils/getApplicationCommands.js');
 const areCommandsDifferent = require('../../utils/areCommandsDifferent.js');
+const removeGuildCommandDuplicates = require('../../utils/removeGuildCommandDuplicates.js');
 
 module.exports = async (client) => {
     try {
@@ -41,6 +42,9 @@ module.exports = async (client) => {
                 console.log(`Command registriert: ${name}`);
             }
         }
+
+        const synchronizedCommands = await getApplicationCommands(client);
+        await removeGuildCommandDuplicates(client, synchronizedCommands.cache);
     } catch (error) {
         console.error('Konnte Slash-Commands nicht registrieren:', error);
     }
