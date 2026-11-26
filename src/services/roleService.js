@@ -197,7 +197,7 @@ async function deleteAllColorRoles(guild) {
 }
 
 async function assignColorRolesToAllMembers(guild) {
-    const members = await guild.members.fetch();
+    const members = await fetchGuildMembersWithRetry(guild);
     const failures = [];
     const warnings = [];
     let assigned = 0;
@@ -220,6 +220,25 @@ async function assignColorRolesToAllMembers(guild) {
     }
 
     return { assigned, eligible, failures, warnings };
+}
+
+async function fetchGuildMembersWithRetry(guild) {
+    try {
+        return await guild.members.fetch();
+    } catch (error) {
+        const retryAfter = error?.data?.retry_after;
+        if (
+            error?.data?.opcode !== 8 ||
+            typeof retryAfter !== 'number' ||
+            !Number.isFinite(retryAfter) ||
+            retryAfter <= 0
+        ) {
+            throw error;
+        }
+
+        await new Promise((resolve) => setTimeout(resolve, retryAfter * 1000));
+        return guild.members.fetch();
+    }
 }
 
 module.exports = {

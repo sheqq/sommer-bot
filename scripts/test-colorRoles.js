@@ -16,10 +16,19 @@ async function run() {
         createMember('bot-1', true),
     ];
     const createOptions = [];
+    let memberFetchAttempts = 0;
     const guild = {
         members: {
             me: botMember,
-            fetch: async () => new Map(members.map((member) => [member.id, member])),
+            fetch: async () => {
+                memberFetchAttempts += 1;
+                if (memberFetchAttempts === 1) {
+                    const error = new Error('Gateway member request rate limited');
+                    error.data = { opcode: 8, retry_after: 0.01 };
+                    throw error;
+                }
+                return new Map(members.map((member) => [member.id, member]));
+            },
         },
         roles: {
             cache: createCollection(),
@@ -41,6 +50,7 @@ async function run() {
     }
 
     const assigned = await assignColorRolesToAllMembers(guild);
+    assert.strictEqual(memberFetchAttempts, 2);
     assert.strictEqual(assigned.assigned, 2);
     assert.strictEqual(assigned.eligible, 2);
     assert.strictEqual(assigned.failures.length, 0);
