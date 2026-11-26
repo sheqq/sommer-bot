@@ -1,4 +1,4 @@
-const { PermissionFlagsBits } = require('discord.js');
+const { MessageFlags, PermissionFlagsBits } = require('discord.js');
 const { assignColorToMember, createRandomColor } = require('../../services/roleService');
 const guildService = require('../../services/guildService');
 
@@ -22,7 +22,7 @@ module.exports = {
     permissionsRequired: [PermissionFlagsBits.Administrator],
 
     callback: async (_client, interaction) => {
-        await interaction.deferReply();
+        await interaction.deferReply({ flags: MessageFlags.Ephemeral });
 
         if (!await guildService.areColorsEnabled(interaction.guildId)) {
             return interaction.editReply('Farbrollen sind auf diesem Server deaktiviert.');
@@ -41,8 +41,8 @@ module.exports = {
         const warningText = warnings.length
             ? '\nDie bisherige Farbrolle konnte nicht vollständig gelöscht werden. Details stehen im Bot-Log.'
             : '';
-        await interaction.editReply(
-            `Die Rolle **${role.name}** wurde erstellt/gewählt und ${user} zugewiesen.${warningText}`
-        );
+        await interaction.editReply({
+            content: `Die Rolle **${role.name}** wurde erstellt/gewählt und ${user} zugewiesen.${warningText}`,
+        });
     },
 };
